@@ -112,7 +112,7 @@ dim(depleted.dat)
 dim(not.depleted.dat)
 depleted.out <- laply(1:236, function(i)result(depleted.dat[i,], depleted = "TRUE"))
 
-not.depleted.out <- laply(1:236, function(i)result(depleted.dat[i,], depleted = "FALSE"))
+not.depleted.out <- laply(1:236, function(i)result(not.depleted.dat[i,], depleted = "FALSE"))
 
 colnames(depleted.out) <- colnames(not.depleted.out) <- c("mean","sd")
 
@@ -129,6 +129,10 @@ mean(depleted.out[,2] > not.depleted.out[,2])
 
 
 wilcox.test(depleted.out[,2], not.depleted.out[, 2], alternative = "greater", paired = TRUE)
+wilcox.test(depleted.out[,2], not.depleted.out[, 2], alternative = "two.sided", paired = TRUE)
+?wilcox.test
+wilcox.test(log(depleted.out[,2]/not.depleted.out[, 2]), alternative = "two.sided")
+wilcox.test(log(depleted.out[,2]/not.depleted.out[, 2]), alternative = "greater")
 
 # check for outlier
 sum(abs(depleted.out[,1])>10)
@@ -146,6 +150,9 @@ mean(depleted.out2[,2] > not.depleted.out2[,2])
 
 
 wilcox.test(depleted.out2[,2], not.depleted.out2[, 2], alternative = "greater", paired = TRUE)
+wilcox.test(depleted.out2[,2], not.depleted.out2[, 2], alternative = "two.sided", paired = TRUE)
+wilcox.test(log(depleted.out2[,2]/not.depleted.out2[, 2]), alternative = "two.sided")
+wilcox.test(log(depleted.out2[,2]/not.depleted.out2[, 2]), alternative = "greater")
 
 depleted.out2 <- as.data.frame(depleted.out2)
 not.depleted.out2 <- as.data.frame(not.depleted.out2)
@@ -153,7 +160,9 @@ depleted.out2$group <- "depleted"
 not.depleted.out2$group <- "whole"
 out2 <- rbind(depleted.out2, not.depleted.out2)
 
-
+str(out2)
+boxplot(out2$sd ~ out2$group)
+boxplot(out$sd ~ out$group)
 qplot(y = depleted.out2[,1], x = not.depleted.out2[,1], xlim = c(-8, 8), 
       ylim = c(-8, 8), main = "mean of each group(deleted outlier)",
       ylab = "depleted", 
@@ -173,3 +182,29 @@ qplot(x = group, y = sd,
       main = "sd for each group")
 
   
+
+depleted.out <- as.data.frame(depleted.out)
+not.depleted.out <- as.data.frame(not.depleted.out)
+depleted.out$group <- "depleted"
+not.depleted.out$group <- "whole"
+out <- rbind(depleted.out, not.depleted.out)
+
+
+qplot(y = depleted.out[,1], x = not.depleted.out[,1], xlim = c(-8, 8), 
+      ylim = c(-8, 8), main = "mean of each group(deleted outlier)",
+      ylab = "depleted", 
+      xlab = "whole")
+qplot(y = depleted.out[,2], x = not.depleted.out[,2], xlim = c(-8, 8), 
+      ylim = c(-8, 8), main = "sd of each group(deleted outlier)",
+      ylab = "depleted", 
+      xlab = "whole")
+
+
+qplot(x = group, y = mean, 
+      data = out, geom = "boxplot", colour =group, 
+      main = "mean for each group")
+
+qplot(x = group, y = sd, 
+      data = out, geom = "boxplot", colour =group,
+      main = "sd for each group")
+
