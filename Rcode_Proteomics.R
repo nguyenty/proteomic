@@ -107,6 +107,7 @@ result <- function(x, depleted){ # x is the row of data (i.e., data of each prot
   
   return(c(mean.estimate, sd.estimate))
 }
+depleted.dat[25,]
 
 dim(depleted.dat)
 dim(not.depleted.dat)
@@ -133,6 +134,9 @@ wilcox.test(depleted.out[,2], not.depleted.out[, 2], alternative = "two.sided", 
 ?wilcox.test
 wilcox.test(log(depleted.out[,2]/not.depleted.out[, 2]), alternative = "two.sided")
 wilcox.test(log(depleted.out[,2]/not.depleted.out[, 2]), alternative = "greater")
+plot(log(depleted.out[,2]), log(not.depleted.out[, 2]))
+hist(log(depleted.out[,2])-log(not.depleted.out[, 2]), nclass = 30)
+mean(log(depleted.out[,2])-log(not.depleted.out[, 2])>0)
 
 # check for outlier
 sum(abs(depleted.out[,1])>10)
@@ -175,7 +179,8 @@ qplot(y = depleted.out2[,2], x = not.depleted.out2[,2], xlim = c(-8, 8),
 
 qplot(x = group, y = mean, 
         data = out2, geom = "boxplot", colour =group, 
-        main = "mean for each group")
+        main = "mean for each group",
+      xlab = )
 
 qplot(x = group, y = sd, 
       data = out2, geom = "boxplot", colour =group,
@@ -200,11 +205,14 @@ qplot(y = depleted.out[,2], x = not.depleted.out[,2], xlim = c(-8, 8),
       xlab = "whole")
 
 
+#colnames(out)[3] <- "Sample Type"  # log(Standard Error)
 qplot(x = group, y = mean, 
       data = out, geom = "boxplot", colour =group, 
       main = "mean for each group")
 
-qplot(x = group, y = sd, 
+qplot(x = group, y = log(sd), 
       data = out, geom = "boxplot", colour =group,
-      main = "sd for each group")
+      main = "Standard Error for Each Sample Type",
+      ylab = "log(Standard Error)", 
+      xlab = "Sample Type")
 
