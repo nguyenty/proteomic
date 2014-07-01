@@ -61,6 +61,8 @@ group[group=="Whole"] # Cy for Whole group: rep(c(3,3,5,5),4)
 #str(metadata)
 # Sample.Name <- c("1807", "4810", "1209", "1906", "3908", "3106", "2107", "2712")
 # line <- rep(c(1,2), each = 8)
+# x <- rnorm(16, 0, 1)
+# depleted <- "TRUE"
 
 result <- function(x, depleted){ # x is the row of data (i.e., data of each protein spot)
   if (depleted == "TRUE"){
@@ -69,36 +71,48 @@ result <- function(x, depleted){ # x is the row of data (i.e., data of each prot
     cy <- as.factor(rep(c(3,3,5,5),4))
   }
   animal <- as.factor(rep(1:8, each = 2))
-  line <- rep(c(1,2), each = 8)
+  line <- as.factor(rep(c(1,2), each = 8))
   # check if all obsetvations for one Cy are missing or not
   if ((sum(is.na(x[cy==3]))==8|sum(is.na(x[cy==5]))==8) & 
         (sum(is.na(x[line==1]))==8|sum(is.na(x[line==2]))==8)){
     model <- lmer(x~ (1|animal), na.action="na.omit")
     mean.estimate <- summary(model)$coeff[,1]
-    sd.estimate <- as.vector(summary(model)$vcov)
+    sd.estimate <- as.vector(sqrt(summary(model)$vcov))
+    #str(summary(model))
   } 
   if ((sum(is.na(x[cy==3]))==8|sum(is.na(x[cy==5]))==8) & 
-        ((sum(is.na(x[line==1]))!=8)&(sum(is.na(x[line==2]))==8))){
+        ((sum(is.na(x[line==1]))!=8)&(sum(is.na(x[line==2]))!=8))){
     model <- lmer(x~ line + (1|animal), na.action="na.omit")
-    mean.estimate <- summary(model)$coeff[,1]
-    sd.estimate <- as.vector(summary(model)$vcov)
+    mean.estimate <- summary(model)$coeff[1,1] + summary(model)$coeff[2,1]/2
+    sd.estimate <- as.vector(sqrt(t(c(1,1/2)) %*%summary(model)$vcov%*%c(1,1/2)))
   }
-  else{
+  
+  if ((sum(is.na(x[cy==3]))!=8|sum(is.na(x[cy==5]))!=8) & 
+        ((sum(is.na(x[line==1]))==8)&(sum(is.na(x[line==2]))==8))){
     model <- lmer(x~ cy + (1|animal), na.action="na.omit")
-    
-    mean.estimate <- summary(model)$coeff[,1][1] + summary(model)$coeff[,1][2]/2
-    
-    sd.estimate <- as.vector(sqrt(t(c(1, 1/2))%*% summary(model)$vcov %*%c(1,1/2)))  
+    mean.estimate <- summary(model)$coeff[1,1] + summary(model)$coeff[2,1]/2
+    sd.estimate <- as.vector(sqrt(t(c(1,1/2)) %*%summary(model)$vcov%*%c(1,1/2)))
   }
+  
+  if ((sum(is.na(x[cy==3]))!=8& sum(is.na(x[cy==5]))!=8) & 
+        ((sum(is.na(x[line==1]))!=8)&(sum(is.na(x[line==2]))!=8))){ 
+    model <- lmer(x~ cy + line + (1|animal), na.action="na.omit")
+    #str(summary(model))
+    mean.estimate <- summary(model)$coeff[1,1] + 
+      summary(model)$coeff[2,1]/2 + 
+      summary(model)$coeff[3,1]/2
+    
+    sd.estimate <- as.vector(sqrt(t(c(1, 1/2, 1/2))%*% summary(model)$vcov %*%c(1,1/2, 1/2)))  }
+  
   
   return(c(mean.estimate, sd.estimate))
 }
 
 dim(depleted.dat)
 dim(not.depleted.dat)
-depleted.out <- aaply(depleted.dat, .(1), function(x)result(x, depleted = "TRUE"))
+depleted.out <- laply(1:236, function(i)result(depleted.dat[i,], depleted = "TRUE"))
 
-not.depleted.out <- aaply(not.depleted.dat, .(1), function(x)result(x, depleted = "FALSE"))
+not.depleted.out <- laply(1:236, function(i)result(depleted.dat[i,], depleted = "FALSE"))
 
 colnames(depleted.out) <- colnames(not.depleted.out) <- c("mean","sd")
 
