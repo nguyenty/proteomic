@@ -7,7 +7,8 @@ library("MASS")
 
 #dat <- read.csv("P:/RFI Protemics/twofileswithproteindata/Proteins of Interst for Tech Paper.csv")
 
-dat <- read.csv("/run/user/1000/gvfs/smb-share:server=smb.stat.iastate.edu,share=ntyet/RFI Protemics/twofileswithproteindata/Proteins of Interst for Tech Paper.csv")
+#dat <- read.csv("/run/user/1000/gvfs/smb-share:server=smb.stat.iastate.edu,share=ntyet/RFI Protemics/twofileswithproteindata/Proteins of Interst for Tech Paper.csv")
+dat <- read.csv("Proteins of Interst for Tech Paper.csv")
 
 dim(dat)
 
@@ -55,24 +56,34 @@ group[group=="Depleted"] # Cy for Depleted group: rep(c(5,5,3,3),4)
 
 group[group=="Whole"] # Cy for Whole group: rep(c(3,3,5,5),4)
 
-metadata <- read.table("/run/user/1000/gvfs/smb-share:server=smb.stat.iastate.edu,share=ntyet/RFI Protemics/twofileswithproteindata/Meta.data2.txt")
-str(metadata)
-Sample.Name <- c("1807", "4810", "1209", "1906", "3908", "3106", "2107", "2712")
-line <- rep(as.factor(metadata$line[metadata$Sample.Name %in%Sample.Name]), each = 2)
-?lmer
-result <- function(x, depleted){
+#metadata <- read.table("/run/user/1000/gvfs/smb-share:server=smb.stat.iastate.edu,share=ntyet/RFI Protemics/twofileswithproteindata/Meta.data2.txt")
+#metadata <- read.table("Meta.data2.txt")
+#str(metadata)
+# Sample.Name <- c("1807", "4810", "1209", "1906", "3908", "3106", "2107", "2712")
+# line <- rep(c(1,2), each = 8)
+
+result <- function(x, depleted){ # x is the row of data (i.e., data of each protein spot)
   if (depleted == "TRUE"){
     cy <- as.factor(rep(c(5,5,3,3),4))
   } else {
     cy <- as.factor(rep(c(3,3,5,5),4))
   }
   animal <- as.factor(rep(1:8, each = 2))
+  line <- rep(c(1,2), each = 8)
   # check if all obsetvations for one Cy are missing or not
-  if (sum(is.na(x[cy==3]))==8|sum(is.na(x[cy==5]))==8){
+  if ((sum(is.na(x[cy==3]))==8|sum(is.na(x[cy==5]))==8) & 
+        (sum(is.na(x[line==1]))==8|sum(is.na(x[line==2]))==8)){
     model <- lmer(x~ (1|animal), na.action="na.omit")
     mean.estimate <- summary(model)$coeff[,1]
     sd.estimate <- as.vector(summary(model)$vcov)
-  } else{
+  } 
+  if ((sum(is.na(x[cy==3]))==8|sum(is.na(x[cy==5]))==8) & 
+        ((sum(is.na(x[line==1]))!=8)&(sum(is.na(x[line==2]))==8))){
+    model <- lmer(x~ line + (1|animal), na.action="na.omit")
+    mean.estimate <- summary(model)$coeff[,1]
+    sd.estimate <- as.vector(summary(model)$vcov)
+  }
+  else{
     model <- lmer(x~ cy + (1|animal), na.action="na.omit")
     
     mean.estimate <- summary(model)$coeff[,1][1] + summary(model)$coeff[,1][2]/2
