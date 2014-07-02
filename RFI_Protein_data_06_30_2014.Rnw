@@ -116,7 +116,7 @@ group[group=="Dhole"] # Cy for whole group: rep(c(3,3,5,5),4)
 \section{Function to fit a Linear Mixed Effect Model for each spot in each group}
 Function to fit a linear mixed model for each spot, with fixed effect is Cy, and random effect is animal.
 
-<<cache=FALSE, message=FALSE,warning=FALSE,results='hide',tidy=FALSE>>=
+<<cache=TRUE, message=FALSE,warning=FALSE,results='hide',tidy=FALSE>>=
 out_model <- function(x, depleted){ # x is the row of data (i.e., data of each protein spot)
   if (depleted == "TRUE"){
     cy <- as.factor(rep(c(5,5,3,3),4))
@@ -179,7 +179,7 @@ Figure \ref{fig:fg1} show the log of standard error of all protein spots in 2 sa
 
 <<fg1>>=
 sd_out <- data.frame(
-  logsd = log(c(whole_out[, "sd"], depleted_out[,"sd"])), 
+  logsd = log(c(whole_out[, 2], depleted_out[,2])), 
   sample = rep(c("whole", "depleted"), each = dim(whole_out)[1]))
 
 p <- ggplot(sd_out, aes(sample, logsd))
