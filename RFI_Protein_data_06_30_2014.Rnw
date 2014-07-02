@@ -44,7 +44,7 @@ set.seed(1121) # make the results repeatable
 @
 
 \section{Cleaning the data}
-<<cache=TRUE, message=FALSE,warning=FALSE>>=
+<<cache=FALSE, message=FALSE,warning=FALSE>>=
 
 ##
 ## Protein of interest for tech paper 01/27/2014
@@ -53,10 +53,7 @@ library("plyr")
 library("ggplot2")
 library("MASS")
 # read data
-
-#dat <- read.csv("P:/RFI Protemics/twofileswithproteindata/Proteins of Interst for Tech Paper.csv")
-
-dat <- read.csv("/run/user/1000/gvfs/smb-share:server=smb.stat.iastate.edu,share=ntyet/RFI Protemics/twofileswithproteindata/Proteins of Interst for Tech Paper.csv")
+dat <- read.csv("Proteins of Interst for Tech Paper.csv")
 
 dim(dat)
 
@@ -66,197 +63,144 @@ x
 @
 
 
-<<cache=TRUE, message=FALSE,warning=FALSE>>=
+<<cache=FALSE, message=FALSE,warning=FALSE>>=
 y <- c( "Image","X", paste("X.", 1:31, sep = "")) # Column name unsued
 
 # Column name used in analysis including the id of protein and 16 gels  
 # of 8 animals, each gel runs twice
 
-use.col <- setdiff(x,y)
-use.col
-dat.used <- as.matrix(dat[, use.col])
-dim(dat.used)
+use_col <- setdiff(x,y)
+use_col
+dat_used <- as.matrix(dat[, use_col])
+dim(dat_used)
 
 @
 
-<<cache=TRUE, message=FALSE,warning=FALSE>>=
-# The first row is group classification, the second row is the name of Std. Abund, therefore the data actually in use is the dat.used except the first 2 rows
-dat.final <- matrix(as.numeric(dat.used[-c(1:2),]), 
-                         nrow = nrow(dat.used)-2,
-                         ncol = ncol(dat.used),
-                         byrow = F) 
-dim(dat.final)
+<<cache=FALSE, message=FALSE,warning=FALSE>>=
 
-head(dat.final)
+# The first row is group classification, the second row is the name of Std. Abund, therefore the data actually in use is the dat_used except the first 2 rows
+dat_final <- matrix(as.numeric(dat_used[-c(1:2),]), 
+                    nrow = nrow(dat_used)-2,
+                    ncol = ncol(dat_used),
+                    byrow = F) 
+dim(dat_final)
+
+
+
 @
 
-<<cache=TRUE, message=FALSE,warning=FALSE>>=
+<<cache=FALSE, message=FALSE,warning=FALSE>>=
 # Group of each sample
 
-group <- dat.used[1,-1] 
+group <- dat_used[1,-1] 
 group
 
-# Obtain data for each group: Depelted and Not.Depleted (Whole), the first column of dat.final contains name of protein
-depleted.dat <- dat.final[,-1][,group=="Depleted"]
-dim(depleted.dat)
-depleted.dat[1,]
+# Obtain data for each group: depleted and whole, the first column of dat_final contains name of protein
+deplete <- dat_final[,-1][,group=="Depleted"]
+dim(deplete)
 
-not.depleted.dat <- dat.final[,-1][,group=="Whole"]
-dim(not.depleted.dat)
-not.depleted.dat[1,]
+
+whole <- dat_final[,-1][,group=="Whole"]
+dim(whole)
+
 @
 
-<<cache=TRUE, message=FALSE,warning=FALSE>>=
+<<cache=FALSE, message=FALSE,warning=FALSE>>=
 
 # Find out which Cy is used for each run
 
-group[group=="Depleted"] # Cy for Depleted group: rep(c(5,5,3,3),4)
+group[group=="Depleted"] # Cy for depleted group: rep(c(5,5,3,3),4)
 
-group[group=="Whole"] # Cy for Whole group: rep(c(3,3,5,5),4)
+group[group=="Dhole"] # Cy for whole group: rep(c(3,3,5,5),4)
 @
 \section{Function to fit a Linear Mixed Effect Model for each spot in each group}
 Function to fit a linear mixed model for each spot, with fixed effect is Cy, and random effect is animal.
 
-<<cache=TRUE, message=FALSE,warning=FALSE,results='hide'>>=
-metadata <- read.table("/run/user/1000/gvfs/smb-share:server=smb.stat.iastate.edu,share=ntyet/RFI Protemics/twofileswithproteindata/Meta.data2.txt")
-str(metadata)
-Sample.Name <- c("1807", "4810", "1209", "1906", "3908", "3106", "2107", "2712")
-line <- rep(as.factor(metadata$line[metadata$Sample.Name %in%Sample.Name]), each = 2)
-?lmer
-result <- function(x, depleted){
+<<cache=FALSE, message=FALSE,warning=FALSE,results='hide',tidy=FALSE>>=
+out_model <- function(x, depleted){ # x is the row of data (i.e., data of each protein spot)
   if (depleted == "TRUE"){
     cy <- as.factor(rep(c(5,5,3,3),4))
   } else {
     cy <- as.factor(rep(c(3,3,5,5),4))
   }
   animal <- as.factor(rep(1:8, each = 2))
+  line <- as.factor(rep(c(1,2), each = 8))
   # check if all obsetvations for one Cy are missing or not
-  if (sum(is.na(x[cy==3]))==8|sum(is.na(x[cy==5]))==8){
+  
+  if ((sum(is.na(x[cy==3]))==8|sum(is.na(x[cy==5]))==8) & 
+        (sum(is.na(x[line==1]))==8|sum(is.na(x[line==2]))==8)){
     model <- lmer(x~ (1|animal), na.action="na.omit")
-    mean.estimate <- summary(model)$coeff[,1]
-    sd.estimate <- as.vector(summary(model)$vcov)
-  } else{
-    model <- lmer(x~ cy + (1|animal), na.action="na.omit")
-    
-    mean.estimate <- summary(model)$coeff[,1][1] + summary(model)$coeff[,1][2]/2
-    
-    sd.estimate <- as.vector(sqrt(t(c(1, 1/2))%*% summary(model)$vcov %*%c(1,1/2)))  
+    mean_est <- summary(model)$coeff[,1]
+    sd_est <- as.vector(sqrt(summary(model)$vcov))
+    #str(summary(model))
+  } 
+  if ((sum(is.na(x[cy==3]))==8|sum(is.na(x[cy==5]))==8) & 
+        ((sum(is.na(x[line==1]))!=8)&(sum(is.na(x[line==2]))!=8))){
+    model <- lmer(x~ line + (1|animal), na.action="na.omit")
+    mean_est <- summary(model)$coeff[1,1] + summary(model)$coeff[2,1]/2
+    sd_est <- as.vector(sqrt(t(c(1,1/2)) %*%summary(model)$vcov%*%c(1,1/2)))
   }
-
-  return(c(mean.estimate, sd.estimate))
+  
+  if ((sum(is.na(x[cy==3]))!=8|sum(is.na(x[cy==5]))!=8) & 
+        ((sum(is.na(x[line==1]))==8)&(sum(is.na(x[line==2]))==8))){
+    model <- lmer(x~ cy + (1|animal), na.action="na.omit")
+    mean_est <- summary(model)$coeff[1,1] + summary(model)$coeff[2,1]/2
+    sd_est <- as.vector(sqrt(t(c(1,1/2)) %*%summary(model)$vcov%*%c(1,1/2)))
+  }
+  
+  if ((sum(is.na(x[cy==3]))!=8& sum(is.na(x[cy==5]))!=8) & 
+        ((sum(is.na(x[line==1]))!=8)&(sum(is.na(x[line==2]))!=8))){ 
+    model <- lmer(x~ cy + line + (1|animal), na.action="na.omit")
+    #str(summary(model))
+    mean_est <- summary(model)$coeff[1,1] + 
+      summary(model)$coeff[2,1]/2 + 
+      summary(model)$coeff[3,1]/2
+    
+    sd_est <- as.vector(sqrt(t(c(1, 1/2, 1/2))%*% summary(model)$vcov %*%c(1,1/2, 1/2)))  }
+  
+  
+  return(c(mean_est, sd_est))
 }
+depleted_out <- laply(1:236, function(i)out_model(deplete[i,], depleted = "TRUE"))
 
+whole_out <- laply(1:236, function(i)out_model(whole[i,], depleted = "FALSE"))
 @
-\section{Results}
-\subsection{Summary of each group-all spots}
 
-Mean and standard errors  for each protein in each group.
 
-<<cache=TRUE,message=FALSE,warning=FALSE>>=
-
-dim(depleted.dat)
-dim(not.depleted.dat)
-depleted.out <- aaply(depleted.dat, .(1), function(x)result(x, depleted = "TRUE"))
-
-not.depleted.out <- aaply(not.depleted.dat, .(1), function(x)result(x, depleted = "FALSE"))
-
-colnames(depleted.out) <- colnames(not.depleted.out) <- c("mean","sd")
-
-@
-Summary for each group 
-<<cache=TRUE, message=FALSE,warning=FALSE,echo=TRUE,fig.align='center',fig.pos='h',out.width='8cm', out.height='8cm', fig.show='hold'>>=
-
-summary(depleted.out) # depleted group
-summary(not.depleted.out) # not.depleted group 
-# mean_group <- as.data.frame(cbind(value =c(depleted.out[,"mean"], not.depleted.out[,"mean"]), group = rep(c("depleted", "whole"), each = dim(depleted.out)[1])))
-# str(mean_group)
-# qplot(mean_group)
-# qplot(group, value, data = mean_group, geom= "boxplot")
-#boxplot(depleted.out)
-@
-\subsection{Comparison of standard errors between groups-all spots}
-Proportion of protein spots having sd in the Depleted Group larrger than sd in the Whole Group
+\section{Results of Comparison of Standard Errors between Two Sample Types}
+Proportion of protein spots whole standard error in the depleted sample larger than that one  in the whole sample.
 <<>>=
 
-mean(depleted.out[,2] > not.depleted.out[,2])
 
+mean(depleted_out[,2]-whole_out[, 2]>0)
 @
-Consider a Wilcoxon signed-rank test H0: The standard errors are the same in depleted vs. non-depleted, H1: the standard errors are significantly higher overall in depleted vs. non-depleted.  The test  uses all the spots
+
+Figure \ref{fig:fg1} show the log of standard error of all protein spots in 2 sample types.
+
+<<fg1>>=
+sd_out <- data.frame(
+  logsd = log(c(whole_out[, "sd"], depleted_out[,"sd"])), 
+  sample = rep(c("whole", "depleted"), each = dim(whole_out)[1]))
+
+p <- ggplot(sd_out, aes(sample, logsd))
+p + geom_boxplot(aes(fill = sample)) + 
+  ggtitle("Standard Error for Each Sample Type") + 
+  scale_fill_discrete(name= "Sample Type") + 
+  xlab("Sample Type") + 
+  ylab("log(Standard Error)") + 
+  theme(text = element_text(size=18))
+@
+Consider a Wilcoxon signed-rank test H0: The standard errors are the same in depleted vs. non-depleted, H1: the standard errors are significantly higher overall in depleted vs. non-depleted.  
+
+
  
 <<echo = TRUE,message=FALSE,warning=FALSE>>=
+# One-sided Test for the non-transformed standard errors 
+wilcox.test(depleted_out[,2], whole_out[, 2], alternative = "greater", paired = TRUE)
 
-wilcox.test(depleted.out[,2], not.depleted.out[, 2], alternative = "greater", paired = TRUE)
-
-@
-
-\subsection{Summary of each group except "big" spots}
-Find "big" spots, and summary of each groups exluding "big" spots
-
-<<cache=TRUE, message=FALSE,warning=FALSE,echo=TRUE,fig.align='center',fig.pos='h',out.width='8cm', out.height='8cm', fig.show='hold'>>=
-# check for outlier
-sum(abs(depleted.out[,1])>10)
-
-# Delete outlier
-depleted.out2 <- depleted.out[-which(abs(depleted.out[,1])>10),]
-
-not.depleted.out2 <- not.depleted.out[-which(abs(depleted.out[,1])>10),]
-
-summary(depleted.out2) # depleted group
-summary(not.depleted.out2) # not.depleted group 
+# One-sided Test for the log-transformed standard errors
+wilcox.test(log(depleted_out[,2]/whole_out[, 2]), alternative = "greater")
 
 @
-
-\subsection{Comparison of standard errors between groups except "big" spots}
-
-Proportion of protein spots having sd in Depleted Group larrger than sd in Whole Group after deleting 7 protein spots with big values
-<<>>=
-
-mean(depleted.out2[,2] > not.depleted.out2[,2])
-
-
-@
-Consider a Wilcoxon signed-rank test H0: The standard errors are the same in depleted vs. non-depleted, H1: the standard errors are significantly higher overall in depleted vs. non-depleted. The test uses  all the spots excluding those with mean greater than 10 in depleted group
-
-<<echo = TRUE,message=FALSE,warning=FALSE>>=
-
-wilcox.test(depleted.out2[,2], not.depleted.out2[, 2], alternative = "greater", paired = TRUE)
-
-@
-
-\subsection{Some plots}
-
-<<cache=TRUE, message=FALSE,warning=FALSE,echo=TRUE,fig.align='center',fig.pos='h',out.width='8cm', out.height='8cm', fig.show='hold'>>=
-
-depleted.out2 <- as.data.frame(depleted.out2)
-not.depleted.out2 <- as.data.frame(not.depleted.out2)
-depleted.out2$group <- "depleted"
-not.depleted.out2$group <- "whole"
-out2 <- rbind(depleted.out2, not.depleted.out2)
-
-
-qplot(y = depleted.out2[,1], x = not.depleted.out2[,1], xlim = c(-8, 8), 
-     ylim = c(-8, 8), main = "mean of each group(deleted outlier)",
-     ylab = "depleted", 
-     xlab = "whole")
-qplot(y = depleted.out2[,2], x = not.depleted.out2[,2], xlim = c(-8, 8), 
-     ylim = c(-8, 8), main = "sd of each group(deleted outlier)",
-     ylab = "depleted", 
-     xlab = "whole")
-@
-
-
-<<cache=TRUE, message=FALSE,warning=FALSE,results='hide',fig.align='center',fig.pos='h',out.width='8cm', out.height='8cm', fig.show='hold'>>=
-
-
-
-qplot(x = group, y = mean, 
-      data = out2, geom = "boxplot", colour =group, 
-      main = "mean for each group")
-
-qplot(x = group, y = sd, 
-      data = out2, geom = "boxplot", colour =group,
-      main = "sd for each group")
-@
-
 
 \end{document}
