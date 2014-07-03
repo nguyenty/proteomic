@@ -170,7 +170,7 @@ sd_whole <- laply(1:236, function(i)out_model(whole[i,], depleted = "FALSE"))
 
 
 \section{Results of Comparison of Standard Errors between Two Sample Types}
-Proportion of protein spots whose standard error in the depleted sample larger than that one  in the whole sample.
+Proportion of protein spots whose standard error in the depleted samples larger than that one  in the whole samples.
 <<>>=
 mean(sd_depleted > sd_whole)
 @
