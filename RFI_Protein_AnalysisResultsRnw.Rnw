@@ -1,0 +1,207 @@
+\documentclass{article}
+\usepackage[sc]{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2.5cm,bmargin=2.5cm,lmargin=2.5cm,rmargin=2.5cm}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+\usepackage{url}
+\usepackage[unicode=true,pdfusetitle,
+            bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=2,
+            breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
+{hyperref}
+\hypersetup{
+  pdfstartview={XYZ null null 1}}
+\usepackage{breakurl}
+\usepackage{amsmath,amsthm,amssymb, graphicx}
+ \usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{graphicx}
+%\usepackage{undertilde}
+\usepackage{accents}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{bmpsize}
+\begin{document}
+
+
+<<setup, include=FALSE, cache=TRUE>>=
+  # set global chunk options
+  opts_chunk$set(fig.path='figure/minimal-', fig.align='center', fig.show='hold')
+options(replace.assign=TRUE,width=100)
+@
+
+
+
+\title{Analyze Protein Data}%replace X with the appropriate number
+\author{} 
+\maketitle
+
+<<echo=FALSE,results='hide'>>=
+# some setup
+options(width=100) # make the printing fit on the page
+set.seed(1121) # make the results repeatable
+@
+
+\section{Cleaning the data}
+<<cache=FALSE, message=FALSE,warning=FALSE,tidy=FALSE>>=
+
+
+## Protein of interest for tech paper 01/27/2014
+library("lme4")
+library("plyr")
+library("ggplot2")
+library("MASS")
+# read data
+dat <- read.csv("Proteins of Interst for Tech Paper.csv")
+
+dim(dat)
+
+x <- colnames(dat) # column name of data
+x
+
+@
+
+
+<<cache=FALSE, message=FALSE,warning=FALSE, tidy=FALSE>>=
+y <- c( "Image","X", paste("X.", 1:31, sep = "")) # Column name unsued
+
+# Column name used in analysis including the id of protein and 16 gels  
+# of 8 animals, each gel runs twice
+
+use_col <- setdiff(x,y)
+use_col
+dat_used <- as.matrix(dat[, use_col])
+dim(dat_used)
+
+@
+
+<<cache=FALSE, message=FALSE,warning=FALSE,tidy=FALSE>>=
+
+# The first row is sample  classification, the second row is the name of Std. Abund, 
+# therefore the data actually in use is the dat_used except the first 2 rows
+dat_final <- matrix(as.numeric(dat_used[-c(1:2),]), 
+                    nrow = nrow(dat_used)-2,
+                    ncol = ncol(dat_used),
+                    byrow = F) 
+dim(dat_final)
+
+
+
+@
+
+<<cache=FALSE, message=FALSE,warning=FALSE,tidy=FALSE>>=
+# sample type of each sample
+
+group <- dat_used[1,-1] 
+group
+
+# Obtain data for each sample type: depleted and whole, the first column of dat_final 
+# contains name of protein
+deplete <- dat_final[,-1][,group=="Depleted"]
+dim(deplete)
+
+
+whole <- dat_final[,-1][,group=="Whole"]
+dim(whole)
+
+@
+
+<<cache=FALSE, message=FALSE,warning=FALSE>>=
+
+# Find out which Cy is used for each run
+
+group[group=="Depleted"] # Cy for depleted sample : rep(c(5,5,3,3),4)
+
+group[group=="Whole"] # Cy for whole sample : rep(c(3,3,5,5),4)
+@
+\section{Function to fit a Linear Mixed Effect Model for each spot in each sample }
+Function to fit a linear mixed model for each spot, with fixed effect is Cy, RFI Line and random effect is animal.
+
+<<cache=TRUE, message=FALSE,warning=FALSE,results='hide',tidy=FALSE>>=
+out_model <- function(x, depleted){ # x is the row of data (i.e., data of each protein spot)
+  if (depleted == "TRUE"){
+    cy <- as.factor(rep(c(5,5,3,3),4))
+  } else {
+    cy <- as.factor(rep(c(3,3,5,5),4))
+  }
+  animal <- as.factor(rep(1:8, each = 2))
+  line <- as.factor(rep(c(1,2), each = 8))
+  # check if all obsetvations for one Cy are missing or not
+  
+  if ((sum(is.na(x[cy==3]))==8|sum(is.na(x[cy==5]))==8) & 
+        (sum(is.na(x[line==1]))==8|sum(is.na(x[line==2]))==8)){
+    model <- lmer(x~ (1|animal), na.action="na.omit")
+    #mean_est <- summary(model)$coeff[,1]
+    sd_est <- as.vector(sqrt(summary(model)$vcov))
+    #str(summary(model))
+  } 
+  if ((sum(is.na(x[cy==3]))==8|sum(is.na(x[cy==5]))==8) & 
+        ((sum(is.na(x[line==1]))!=8)&(sum(is.na(x[line==2]))!=8))){
+    model <- lmer(x~ line + (1|animal), na.action="na.omit")
+    #mean_est <- summary(model)$coeff[1,1] + summary(model)$coeff[2,1]/2
+    sd_est <- as.vector(sqrt(t(c(1,1/2)) %*%summary(model)$vcov%*%c(1,1/2)))
+  }
+  
+  if ((sum(is.na(x[cy==3]))!=8|sum(is.na(x[cy==5]))!=8) & 
+        ((sum(is.na(x[line==1]))==8)&(sum(is.na(x[line==2]))==8))){
+    model <- lmer(x~ cy + (1|animal), na.action="na.omit")
+    #mean_est <- summary(model)$coeff[1,1] + summary(model)$coeff[2,1]/2
+    sd_est <- as.vector(sqrt(t(c(1,1/2)) %*%summary(model)$vcov%*%c(1,1/2)))
+  }
+  
+  if ((sum(is.na(x[cy==3]))!=8& sum(is.na(x[cy==5]))!=8) & 
+        ((sum(is.na(x[line==1]))!=8)&(sum(is.na(x[line==2]))!=8))){ 
+    model <- lmer(x~ cy + line + (1|animal), na.action="na.omit")
+    #str(summary(model))
+#    mean_est <- summary(model)$coeff[1,1] + 
+ #     summary(model)$coeff[2,1]/2 + 
+  #    summary(model)$coeff[3,1]/2
+    
+    sd_est <- as.vector(sqrt(t(c(1, 1/2, 1/2))%*% summary(model)$vcov %*%c(1,1/2, 1/2)))  }
+  
+  
+  return( sd_est)
+}
+sd_depleted <- laply(1:236, function(i)out_model(deplete[i,], depleted = "TRUE"))
+
+sd_whole <- laply(1:236, function(i)out_model(whole[i,], depleted = "FALSE"))
+@
+
+
+\section{Results of Comparison of Standard Errors between Two Sample Types}
+Proportion of protein spots whose standard error in the depleted sample larger than that one  in the whole sample.
+<<>>=
+mean(sd_depleted > sd_whole)
+@
+
+Figure \ref{fig:fg1} show the log of standard error of all protein spots in 2 sample types.
+
+<<fg1, tidy=FALSE,fig.cap= "Log(Standard Error) for Each Sample Type",fig.pos='h'>>=
+
+log_sd <- data.frame(
+  logsd = log(c(sd_whole, sd_depleted)), 
+  sample = rep(c("whole", "depleted"), each = length(sd_whole)))
+# write.table(log_sd, file = "log_sd.txt")
+
+p <- ggplot(log_sd, aes(sample, logsd))
+p + geom_boxplot(aes(fill = sample)) + 
+  ggtitle("Standard Error for Each Sample Type") + 
+  scale_fill_discrete(name= "Sample Type") + 
+  xlab("Sample Type") + 
+  ylab("log(Standard Error)") + 
+  theme(text = element_text(size=15))
+@
+
+Consider a Wilcoxon signed-rank test H0: The standard errors are the same in depleted samples vs. whole samples, H1: the standard errors are significantly higher overall in depleted samples vs. non-depleted samples.  The first test using the non-transformed standard errors has p-value = 0.6575. The second test using the log-transformed standard errors has p-value = 0.1706. 
+
+<<echo = TRUE,message=FALSE,warning=FALSE>>=
+# One-sided Test for the non-transformed standard errors 
+wilcox.test(sd_depleted, sd_whole, alternative = "greater", paired = TRUE)
+
+# One-sided Test for the log-transformed standard errors
+wilcox.test(log(sd_depleted/sd_whole), alternative = "greater")
+
+@
+
+\end{document}
