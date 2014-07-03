@@ -202,9 +202,6 @@ wilcox.test(sd_depleted, sd_whole, alternative = "greater", paired = TRUE)
 # One-sided Test for the log-transformed standard errors
 wilcox.test(log(sd_depleted/sd_whole), alternative = "greater")
 
-# # 
-# pbinom(124, size = 236, prob = 0.5, lower.tail = FALSE)
-
 @
 
 \end{document}
