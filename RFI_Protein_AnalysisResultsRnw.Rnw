@@ -116,7 +116,7 @@ group[group=="Depleted"] # Cy for depleted sample : rep(c(5,5,3,3),4)
 group[group=="Whole"] # Cy for whole sample : rep(c(3,3,5,5),4)
 @
 \section{Function to fit a Linear Mixed Effect Model for each spot in each sample }
-Function to fit a linear mixed model for each spot, with fixed effect is Cy, RFI Line and random effect is animal.
+Function to fit a linear mixed model for each spot, with fixed effects are Cy, RFI Line and the random effect is animal.
 
 <<cache=TRUE, message=FALSE,warning=FALSE,results='hide',tidy=FALSE>>=
 out_model <- function(x, depleted){ # x is the row of data (i.e., data of each protein spot)
@@ -190,10 +190,10 @@ p + geom_boxplot(aes(fill = sample)) +
   scale_fill_discrete(name= "Sample Type") + 
   xlab("Sample Type") + 
   ylab("log(Standard Error)") + 
-  theme(text = element_text(size=15))
+  theme(text = element_text(size=11))
 @
 
-Consider a Wilcoxon signed-rank test H0: The standard errors are the same in depleted samples vs. whole samples, H1: the standard errors are significantly higher overall in depleted samples vs. non-depleted samples.  The first test using the non-transformed standard errors has p-value = 0.6575. The second test using the log-transformed standard errors has p-value = 0.1706. 
+Consider a Wilcoxon signed-rank test H0: The distribution of the  standard errors across protein   is the same for  depleted samples and whole samples, H1: the standard errors tend to be larger for depleted samples than for whole samples.  The first test using the non-transformed standard errors has p-value = 0.6575. The second test using the log-transformed standard errors has p-value = 0.1706. 
 
 <<echo = TRUE,message=FALSE,warning=FALSE>>=
 # One-sided Test for the non-transformed standard errors 
@@ -201,6 +201,9 @@ wilcox.test(sd_depleted, sd_whole, alternative = "greater", paired = TRUE)
 
 # One-sided Test for the log-transformed standard errors
 wilcox.test(log(sd_depleted/sd_whole), alternative = "greater")
+
+# # 
+# pbinom(124, size = 236, prob = 0.5, lower.tail = FALSE)
 
 @
 
