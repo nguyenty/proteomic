@@ -1,4 +1,0 @@
-proteomic
-=========
-
-Protein project
