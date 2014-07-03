@@ -4,9 +4,6 @@ library("ggplot2")
 library("MASS")
 # read data
 
-#dat <- read.csv("P:/RFI Protemics/twofileswithproteindata/Proteins of Interst for Tech Paper.csv")
-
-#dat <- read.csv("/run/user/1000/gvfs/smb-share:server=smb.stat.iastate.edu,share=ntyet/RFI Protemics/twofileswithproteindata/Proteins of Interst for Tech Paper.csv")
 dat <- read.csv("Proteins of Interst for Tech Paper.csv")
 
 dim(dat)
