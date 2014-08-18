@@ -45,6 +45,12 @@ dim(deplete)
 whole <- dat_final[,-1][,group=="Whole"]
 dim(whole)
 
+group[group == "Whole"]
+head(whole[,c(3,4)])
+head(deplete[,c(3,4)], 20)
+dim(deplete)
+length(which(deplete[,3] == deplete[,4]))/dim(deplete)[1]
+length(which(whole[,3] == whole[,4]))/dim(whole)[1]
 
 # Find out which Cy is used for each run
 
