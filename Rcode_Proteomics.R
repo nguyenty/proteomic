@@ -121,6 +121,8 @@ sd_out <- data.frame(
   lsmean = c(whole_out[, "lsmean"], depleted_out[,"lsmean"]),
   sample = rep(c("whole", "depleted"), each = dim(whole_out)[1]))
 
+## logsd plot ####
+
 p <- ggplot(sd_out, aes(sample, logsd))
 p + geom_boxplot(aes(fill = sample)) + 
   ggtitle("Standard Error for Each Sample Type") + 
@@ -129,6 +131,42 @@ p + geom_boxplot(aes(fill = sample)) +
   ylab("log(Standard Error)") + 
   theme(text = element_text(size=18))
 
+
+wilcox.test(log(depleted_out[,2]), log(whole_out[, 2]), alternative = "greater", paired = TRUE)
+#wilcox.test(depleted_out[,2], whole_out[, 2], alternative = "two.sided", paired = TRUE)
+
+
+#wilcox.test(log(depleted_out[,2]/whole_out[, 2]), alternative = "two.sided")
+wilcox.test(log(depleted_out[,2]/whole_out[, 2]), alternative = "greater")
+
+
+
+## lsmean plot ####
+
+p <- ggplot(sd_out, aes(sample, lsmean))
+
+p <- ggplot(subset(sd_out, , aes(sample, lsmean))
+
+p + geom_boxplot(aes(fill = sample)) + 
+  ggtitle("LSmean for Each Sample Type") + 
+  scale_fill_discrete(name= "Sample Type") + 
+  xlab("Sample Type") + 
+  ylab("LSmean") + 
+  theme(text = element_text(size=18)) + 
+  ylim(-10, 10)
+
+summary(depleted_out[,1])
+summary(whole_out[,1])
+wilcox.test((depleted_out[which(depleted_out[,1] >=-10),1]), (whole_out[which(depleted_out[,1] >=-10), 1]), alternative = "greater", paired = TRUE)
+
+#wilcox.test(depleted_out[,2], whole_out[, 2], alternative = "two.sided", paired = TRUE)
+
+
+#wilcox.test(log(depleted_out[,2]/whole_out[, 2]), alternative = "two.sided")
+wilcox.test(log(depleted_out[,2]/whole_out[, 2]), alternative = "greater")
+
+
+### Plot of logsd vs abundance ###
 qplot(lsmean, logsd, data=sd_out, colour=sample, 
       xlim =c(-10, 10))
 
@@ -139,11 +177,3 @@ p1 <- ggplot(sd_out, aes(lsmean, logsd), colour = sample) +
   ggtitle("Logsd vs. abundance of protein spots") +
   geom_smooth()
 p1
-wilcox.test(log(depleted_out[,2]), log(whole_out[, 2]), alternative = "greater", paired = TRUE)
-wilcox.test(depleted_out[,2], whole_out[, 2], alternative = "two.sided", paired = TRUE)
-
-
-wilcox.test(log(depleted_out[,2]/whole_out[, 2]), alternative = "two.sided")
-wilcox.test(log(depleted_out[,2]/whole_out[, 2]), alternative = "greater")
-
-
