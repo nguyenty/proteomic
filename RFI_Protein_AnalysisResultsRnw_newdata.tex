@@ -1,0 +1,464 @@
+\documentclass{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\usepackage[sc]{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2.5cm,bmargin=2.5cm,lmargin=2.5cm,rmargin=2.5cm}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+\usepackage{url}
+\usepackage[unicode=true,pdfusetitle,
+            bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=2,
+            breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
+{hyperref}
+\hypersetup{
+  pdfstartview={XYZ null null 1}}
+\usepackage{breakurl}
+\usepackage{amsmath,amsthm,amssymb, graphicx}
+ \usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{graphicx}
+%\usepackage{undertilde}
+\usepackage{accents}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{bmpsize}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+
+
+
+
+
+
+\title{Analyze Protein Data}%replace X with the appropriate number
+\author{} 
+\maketitle
+
+
+
+
+\section{Cleaning the data}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{## Protein of interest for tech paper 01/27/2014}
+\hlkwd{library}\hlstd{(}\hlstr{"lme4"}\hlstd{)}
+\hlkwd{library}\hlstd{(}\hlstr{"plyr"}\hlstd{)}
+\hlkwd{library}\hlstd{(}\hlstr{"ggplot2"}\hlstd{)}
+\hlkwd{library}\hlstd{(}\hlstr{"MASS"}\hlstd{)}
+\hlcom{# read data}
+\hlstd{dat} \hlkwb{<-} \hlkwd{read.csv}\hlstd{(}\hlstr{"239 tech paper_08_19_2014.csv"}\hlstd{)}
+
+\hlkwd{dim}\hlstd{(dat)}
+\end{alltt}
+\begin{verbatim}
+## [1] 241  66
+\end{verbatim}
+\begin{alltt}
+\hlstd{x} \hlkwb{<-} \hlkwd{colnames}\hlstd{(dat)} \hlcom{# column name of data}
+\hlstd{x}
+\end{alltt}
+\begin{verbatim}
+##  [1] "BVAExport"                          "Image"                             
+##  [3] "Gel_1_Run_1_Pig_1807_45034.CY3.gel" "X"                                 
+##  [5] "Gel_1_Run_1_Pig_1807_45034.CY5.gel" "X.1"                               
+##  [7] "Gel_1_Run_2_Pig_1807_45046.CY3.gel" "X.2"                               
+##  [9] "Gel_1_Run_2_Pig_1807_45046.CY5.gel" "X.3"                               
+## [11] "Gel_2_Run_1_4810_45035.CY3.gel"     "X.4"                               
+## [13] "Gel_2_Run_1_4810_45035.CY5.gel"     "X.5"                               
+## [15] "Gel_2_Run_2_Pig_4810_45047.CY3.gel" "X.6"                               
+## [17] "Gel_2_Run_2_Pig_4810_45047.CY5.gel" "X.7"                               
+## [19] "Gel_3_Run_1_Pig_1209_45036.CY3.gel" "X.8"                               
+## [21] "Gel_3_Run_1_Pig_1209_45036.CY5.gel" "X.9"                               
+## [23] "Gel_3_Run_2_Pig_1209_45048.CY3.gel" "X.10"                              
+## [25] "Gel_3_Run_2_Pig_1209_45048.CY5.gel" "X.11"                              
+## [27] "Gel_4_Run_1_Pig_1906_45037.CY3.gel" "X.12"                              
+## [29] "Gel_4_Run_1_Pig_1906_45037.CY5.gel" "X.13"                              
+## [31] "Gel_4_Run_2_Pig_1906_45049.CY3.gel" "X.14"                              
+## [33] "Gel_4_Run_2_Pig_1906_45049.CY5.gel" "X.15"                              
+## [35] "Gel_5_Run_1_Pig_3908_45038.CY3.gel" "X.16"                              
+## [37] "Gel_5_Run_1_Pig_3908_45038.CY5.gel" "X.17"                              
+## [39] "Gel_5_Run_2_Pig_3908_45050.CY3.gel" "X.18"                              
+## [41] "Gel_5_Run_2_Pig_3908_45050.CY5.gel" "X.19"                              
+## [43] "Gel_6_Run_1_Pig_3106_45039.CY3.gel" "X.20"                              
+## [45] "Gel_6_Run_1_Pig_3106_45039.CY5.gel" "X.21"                              
+## [47] "Gel_6_Run_2_Pig_3106_45051.CY3.gel" "X.22"                              
+## [49] "Gel_6_Run_2_Pig_3106_45051.CY5.gel" "X.23"                              
+## [51] "Gel_7_Run_1_Pig_2107_45040.CY3.gel" "X.24"                              
+## [53] "Gel_7_Run_1_Pig_2107_45040.CY5.gel" "X.25"                              
+## [55] "Gel_7_Run_2_Pig_2107_45052.CY3.gel" "X.26"                              
+## [57] "Gel_7_Run_2_Pig_2107_45052.CY5.gel" "X.27"                              
+## [59] "Gel_8_Run_1_Pig_2712_45041.CY3.gel" "X.28"                              
+## [61] "Gel_8_Run_1_Pig_2712_45041.CY5.gel" "X.29"                              
+## [63] "Gel_8_Run_2_Pig_2712_44495.CY3.gel" "X.30"                              
+## [65] "Gel_8_Run_2_Pig_2712_44495.CY5.gel" "X.31"
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{y} \hlkwb{<-} \hlkwd{c}\hlstd{(} \hlstr{"Image"}\hlstd{,}\hlstr{"X"}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlstr{"X."}\hlstd{,} \hlnum{1}\hlopt{:}\hlnum{31}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{""}\hlstd{))} \hlcom{# Column name unsued}
+
+\hlcom{# Column name used in analysis including the id of protein and 16 gels  }
+\hlcom{# of 8 animals, each gel runs twice}
+
+\hlstd{use_col} \hlkwb{<-} \hlkwd{setdiff}\hlstd{(x,y)}
+\hlstd{use_col}
+\end{alltt}
+\begin{verbatim}
+##  [1] "BVAExport"                          "Gel_1_Run_1_Pig_1807_45034.CY3.gel"
+##  [3] "Gel_1_Run_1_Pig_1807_45034.CY5.gel" "Gel_1_Run_2_Pig_1807_45046.CY3.gel"
+##  [5] "Gel_1_Run_2_Pig_1807_45046.CY5.gel" "Gel_2_Run_1_4810_45035.CY3.gel"    
+##  [7] "Gel_2_Run_1_4810_45035.CY5.gel"     "Gel_2_Run_2_Pig_4810_45047.CY3.gel"
+##  [9] "Gel_2_Run_2_Pig_4810_45047.CY5.gel" "Gel_3_Run_1_Pig_1209_45036.CY3.gel"
+## [11] "Gel_3_Run_1_Pig_1209_45036.CY5.gel" "Gel_3_Run_2_Pig_1209_45048.CY3.gel"
+## [13] "Gel_3_Run_2_Pig_1209_45048.CY5.gel" "Gel_4_Run_1_Pig_1906_45037.CY3.gel"
+## [15] "Gel_4_Run_1_Pig_1906_45037.CY5.gel" "Gel_4_Run_2_Pig_1906_45049.CY3.gel"
+## [17] "Gel_4_Run_2_Pig_1906_45049.CY5.gel" "Gel_5_Run_1_Pig_3908_45038.CY3.gel"
+## [19] "Gel_5_Run_1_Pig_3908_45038.CY5.gel" "Gel_5_Run_2_Pig_3908_45050.CY3.gel"
+## [21] "Gel_5_Run_2_Pig_3908_45050.CY5.gel" "Gel_6_Run_1_Pig_3106_45039.CY3.gel"
+## [23] "Gel_6_Run_1_Pig_3106_45039.CY5.gel" "Gel_6_Run_2_Pig_3106_45051.CY3.gel"
+## [25] "Gel_6_Run_2_Pig_3106_45051.CY5.gel" "Gel_7_Run_1_Pig_2107_45040.CY3.gel"
+## [27] "Gel_7_Run_1_Pig_2107_45040.CY5.gel" "Gel_7_Run_2_Pig_2107_45052.CY3.gel"
+## [29] "Gel_7_Run_2_Pig_2107_45052.CY5.gel" "Gel_8_Run_1_Pig_2712_45041.CY3.gel"
+## [31] "Gel_8_Run_1_Pig_2712_45041.CY5.gel" "Gel_8_Run_2_Pig_2712_44495.CY3.gel"
+## [33] "Gel_8_Run_2_Pig_2712_44495.CY5.gel"
+\end{verbatim}
+\begin{alltt}
+\hlstd{dat_used} \hlkwb{<-} \hlkwd{as.matrix}\hlstd{(dat[, use_col])}
+\hlkwd{dim}\hlstd{(dat_used)}
+\end{alltt}
+\begin{verbatim}
+## [1] 241  33
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# The first row is sample  classification, the second row is the name of Std. Abund, }
+\hlcom{# therefore the data actually in use is the dat_used except the first 2 rows}
+\hlstd{dat_final} \hlkwb{<-} \hlkwd{matrix}\hlstd{(}\hlkwd{as.numeric}\hlstd{(dat_used[}\hlopt{-}\hlkwd{c}\hlstd{(}\hlnum{1}\hlopt{:}\hlnum{2}\hlstd{),]),}
+                    \hlkwc{nrow} \hlstd{=} \hlkwd{nrow}\hlstd{(dat_used)}\hlopt{-}\hlnum{2}\hlstd{,}
+                    \hlkwc{ncol} \hlstd{=} \hlkwd{ncol}\hlstd{(dat_used),}
+                    \hlkwc{byrow} \hlstd{= F)}
+\hlkwd{dim}\hlstd{(dat_final)}
+\end{alltt}
+\begin{verbatim}
+## [1] 239  33
+\end{verbatim}
+\begin{alltt}
+
+
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# sample type of each sample}
+
+\hlstd{group} \hlkwb{<-} \hlstd{dat_used[}\hlnum{1}\hlstd{,}\hlopt{-}\hlnum{1}\hlstd{]}
+\hlstd{group}
+\end{alltt}
+\begin{verbatim}
+## Gel_1_Run_1_Pig_1807_45034.CY3.gel Gel_1_Run_1_Pig_1807_45034.CY5.gel 
+##                            "Whole"                         "Depleted" 
+## Gel_1_Run_2_Pig_1807_45046.CY3.gel Gel_1_Run_2_Pig_1807_45046.CY5.gel 
+##                            "Whole"                         "Depleted" 
+##     Gel_2_Run_1_4810_45035.CY3.gel     Gel_2_Run_1_4810_45035.CY5.gel 
+##                         "Depleted"                            "Whole" 
+## Gel_2_Run_2_Pig_4810_45047.CY3.gel Gel_2_Run_2_Pig_4810_45047.CY5.gel 
+##                         "Depleted"                            "Whole" 
+## Gel_3_Run_1_Pig_1209_45036.CY3.gel Gel_3_Run_1_Pig_1209_45036.CY5.gel 
+##                            "Whole"                         "Depleted" 
+## Gel_3_Run_2_Pig_1209_45048.CY3.gel Gel_3_Run_2_Pig_1209_45048.CY5.gel 
+##                            "Whole"                         "Depleted" 
+## Gel_4_Run_1_Pig_1906_45037.CY3.gel Gel_4_Run_1_Pig_1906_45037.CY5.gel 
+##                         "Depleted"                            "Whole" 
+## Gel_4_Run_2_Pig_1906_45049.CY3.gel Gel_4_Run_2_Pig_1906_45049.CY5.gel 
+##                         "Depleted"                            "Whole" 
+## Gel_5_Run_1_Pig_3908_45038.CY3.gel Gel_5_Run_1_Pig_3908_45038.CY5.gel 
+##                            "Whole"                         "Depleted" 
+## Gel_5_Run_2_Pig_3908_45050.CY3.gel Gel_5_Run_2_Pig_3908_45050.CY5.gel 
+##                            "Whole"                         "Depleted" 
+## Gel_6_Run_1_Pig_3106_45039.CY3.gel Gel_6_Run_1_Pig_3106_45039.CY5.gel 
+##                         "Depleted"                            "Whole" 
+## Gel_6_Run_2_Pig_3106_45051.CY3.gel Gel_6_Run_2_Pig_3106_45051.CY5.gel 
+##                         "Depleted"                            "Whole" 
+## Gel_7_Run_1_Pig_2107_45040.CY3.gel Gel_7_Run_1_Pig_2107_45040.CY5.gel 
+##                            "Whole"                         "Depleted" 
+## Gel_7_Run_2_Pig_2107_45052.CY3.gel Gel_7_Run_2_Pig_2107_45052.CY5.gel 
+##                            "Whole"                         "Depleted" 
+## Gel_8_Run_1_Pig_2712_45041.CY3.gel Gel_8_Run_1_Pig_2712_45041.CY5.gel 
+##                         "Depleted"                            "Whole" 
+## Gel_8_Run_2_Pig_2712_44495.CY3.gel Gel_8_Run_2_Pig_2712_44495.CY5.gel 
+##                         "Depleted"                            "Whole"
+\end{verbatim}
+\begin{alltt}
+\hlcom{# Obtain data for each sample type: depleted and whole, the first column of dat_final }
+\hlcom{# contains name of protein}
+\hlstd{deplete} \hlkwb{<-} \hlstd{dat_final[,}\hlopt{-}\hlnum{1}\hlstd{][,group}\hlopt{==}\hlstr{"Depleted"}\hlstd{]}
+\hlkwd{dim}\hlstd{(deplete)}
+\end{alltt}
+\begin{verbatim}
+## [1] 239  16
+\end{verbatim}
+\begin{alltt}
+\hlstd{whole} \hlkwb{<-} \hlstd{dat_final[,}\hlopt{-}\hlnum{1}\hlstd{][,group}\hlopt{==}\hlstr{"Whole"}\hlstd{]}
+\hlkwd{dim}\hlstd{(whole)}
+\end{alltt}
+\begin{verbatim}
+## [1] 239  16
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# Find out which Cy is used for each run}
+
+\hlstd{group[group} \hlopt{==} \hlstr{"Depleted"}\hlstd{]}  \hlcom{# Cy for depleted sample : rep(c(5,5,3,3),4)}
+\end{alltt}
+\begin{verbatim}
+## Gel_1_Run_1_Pig_1807_45034.CY5.gel Gel_1_Run_2_Pig_1807_45046.CY5.gel 
+##                         "Depleted"                         "Depleted" 
+##     Gel_2_Run_1_4810_45035.CY3.gel Gel_2_Run_2_Pig_4810_45047.CY3.gel 
+##                         "Depleted"                         "Depleted" 
+## Gel_3_Run_1_Pig_1209_45036.CY5.gel Gel_3_Run_2_Pig_1209_45048.CY5.gel 
+##                         "Depleted"                         "Depleted" 
+## Gel_4_Run_1_Pig_1906_45037.CY3.gel Gel_4_Run_2_Pig_1906_45049.CY3.gel 
+##                         "Depleted"                         "Depleted" 
+## Gel_5_Run_1_Pig_3908_45038.CY5.gel Gel_5_Run_2_Pig_3908_45050.CY5.gel 
+##                         "Depleted"                         "Depleted" 
+## Gel_6_Run_1_Pig_3106_45039.CY3.gel Gel_6_Run_2_Pig_3106_45051.CY3.gel 
+##                         "Depleted"                         "Depleted" 
+## Gel_7_Run_1_Pig_2107_45040.CY5.gel Gel_7_Run_2_Pig_2107_45052.CY5.gel 
+##                         "Depleted"                         "Depleted" 
+## Gel_8_Run_1_Pig_2712_45041.CY3.gel Gel_8_Run_2_Pig_2712_44495.CY3.gel 
+##                         "Depleted"                         "Depleted"
+\end{verbatim}
+\begin{alltt}
+\hlstd{group[group} \hlopt{==} \hlstr{"Whole"}\hlstd{]}  \hlcom{# Cy for whole sample : rep(c(3,3,5,5),4)}
+\end{alltt}
+\begin{verbatim}
+## Gel_1_Run_1_Pig_1807_45034.CY3.gel Gel_1_Run_2_Pig_1807_45046.CY3.gel 
+##                            "Whole"                            "Whole" 
+##     Gel_2_Run_1_4810_45035.CY5.gel Gel_2_Run_2_Pig_4810_45047.CY5.gel 
+##                            "Whole"                            "Whole" 
+## Gel_3_Run_1_Pig_1209_45036.CY3.gel Gel_3_Run_2_Pig_1209_45048.CY3.gel 
+##                            "Whole"                            "Whole" 
+## Gel_4_Run_1_Pig_1906_45037.CY5.gel Gel_4_Run_2_Pig_1906_45049.CY5.gel 
+##                            "Whole"                            "Whole" 
+## Gel_5_Run_1_Pig_3908_45038.CY3.gel Gel_5_Run_2_Pig_3908_45050.CY3.gel 
+##                            "Whole"                            "Whole" 
+## Gel_6_Run_1_Pig_3106_45039.CY5.gel Gel_6_Run_2_Pig_3106_45051.CY5.gel 
+##                            "Whole"                            "Whole" 
+## Gel_7_Run_1_Pig_2107_45040.CY3.gel Gel_7_Run_2_Pig_2107_45052.CY3.gel 
+##                            "Whole"                            "Whole" 
+## Gel_8_Run_1_Pig_2712_45041.CY5.gel Gel_8_Run_2_Pig_2712_44495.CY5.gel 
+##                            "Whole"                            "Whole"
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\section{Function to fit a Linear Mixed Effect Model for each spot in each sample }
+Function to fit a linear mixed model for each spot, with fixed effects are Cy, RFI Line and the random effect is animal.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{out_model} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{,} \hlkwc{depleted}\hlstd{)\{} \hlcom{# x is the row of data (i.e., data of each protein spot)}
+  \hlkwa{if} \hlstd{(depleted} \hlopt{==} \hlstr{"TRUE"}\hlstd{)\{}
+    \hlstd{cy} \hlkwb{<-} \hlkwd{as.factor}\hlstd{(}\hlkwd{rep}\hlstd{(}\hlkwd{c}\hlstd{(}\hlnum{5}\hlstd{,}\hlnum{5}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{),}\hlnum{4}\hlstd{))}
+  \hlstd{\}} \hlkwa{else} \hlstd{\{}
+    \hlstd{cy} \hlkwb{<-} \hlkwd{as.factor}\hlstd{(}\hlkwd{rep}\hlstd{(}\hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{5}\hlstd{,}\hlnum{5}\hlstd{),}\hlnum{4}\hlstd{))}
+  \hlstd{\}}
+  \hlstd{animal} \hlkwb{<-} \hlkwd{as.factor}\hlstd{(}\hlkwd{rep}\hlstd{(}\hlnum{1}\hlopt{:}\hlnum{8}\hlstd{,} \hlkwc{each} \hlstd{=} \hlnum{2}\hlstd{))}
+  \hlstd{line} \hlkwb{<-} \hlkwd{as.factor}\hlstd{(}\hlkwd{rep}\hlstd{(}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{2}\hlstd{),} \hlkwc{each} \hlstd{=} \hlnum{8}\hlstd{))}
+  \hlcom{# check if all obsetvations for one Cy are missing or not}
+
+  \hlkwa{if} \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{3}\hlstd{]))}\hlopt{==}\hlnum{8}\hlopt{|}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{5}\hlstd{]))}\hlopt{==}\hlnum{8}\hlstd{)} \hlopt{&}
+        \hlstd{(}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{1}\hlstd{]))}\hlopt{==}\hlnum{8}\hlopt{|}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{2}\hlstd{]))}\hlopt{==}\hlnum{8}\hlstd{))\{}
+    \hlstd{model} \hlkwb{<-} \hlkwd{lmer}\hlstd{(x}\hlopt{~} \hlstd{(}\hlnum{1}\hlopt{|}\hlstd{animal),} \hlkwc{na.action}\hlstd{=}\hlstr{"na.omit"}\hlstd{)}
+    \hlcom{#mean_est <- summary(model)$coeff[,1]}
+    \hlstd{sd_est} \hlkwb{<-} \hlkwd{as.vector}\hlstd{(}\hlkwd{sqrt}\hlstd{(}\hlkwd{summary}\hlstd{(model)}\hlopt{$}\hlstd{vcov))}
+    \hlcom{#str(summary(model))}
+  \hlstd{\}}
+  \hlkwa{if} \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{3}\hlstd{]))}\hlopt{==}\hlnum{8}\hlopt{|}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{5}\hlstd{]))}\hlopt{==}\hlnum{8}\hlstd{)} \hlopt{&}
+        \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{1}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlstd{)}\hlopt{&}\hlstd{(}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{2}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlstd{)))\{}
+    \hlstd{model} \hlkwb{<-} \hlkwd{lmer}\hlstd{(x}\hlopt{~} \hlstd{line} \hlopt{+} \hlstd{(}\hlnum{1}\hlopt{|}\hlstd{animal),} \hlkwc{na.action}\hlstd{=}\hlstr{"na.omit"}\hlstd{)}
+    \hlcom{#mean_est <- summary(model)$coeff[1,1] + summary(model)$coeff[2,1]/2}
+    \hlstd{sd_est} \hlkwb{<-} \hlkwd{as.vector}\hlstd{(}\hlkwd{sqrt}\hlstd{(}\hlkwd{t}\hlstd{(}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlopt{/}\hlnum{2}\hlstd{))} \hlopt{%*%}\hlkwd{summary}\hlstd{(model)}\hlopt{$}\hlstd{vcov}\hlopt{%*%}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlopt{/}\hlnum{2}\hlstd{)))}
+  \hlstd{\}}
+
+  \hlkwa{if} \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{3}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlopt{|}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{5}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlstd{)} \hlopt{&}
+        \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{1}\hlstd{]))}\hlopt{==}\hlnum{8}\hlstd{)}\hlopt{&}\hlstd{(}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{2}\hlstd{]))}\hlopt{==}\hlnum{8}\hlstd{)))\{}
+    \hlstd{model} \hlkwb{<-} \hlkwd{lmer}\hlstd{(x}\hlopt{~} \hlstd{cy} \hlopt{+} \hlstd{(}\hlnum{1}\hlopt{|}\hlstd{animal),} \hlkwc{na.action}\hlstd{=}\hlstr{"na.omit"}\hlstd{)}
+    \hlcom{#mean_est <- summary(model)$coeff[1,1] + summary(model)$coeff[2,1]/2}
+    \hlstd{sd_est} \hlkwb{<-} \hlkwd{as.vector}\hlstd{(}\hlkwd{sqrt}\hlstd{(}\hlkwd{t}\hlstd{(}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlopt{/}\hlnum{2}\hlstd{))} \hlopt{%*%}\hlkwd{summary}\hlstd{(model)}\hlopt{$}\hlstd{vcov}\hlopt{%*%}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlopt{/}\hlnum{2}\hlstd{)))}
+  \hlstd{\}}
+
+  \hlkwa{if} \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{3}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlopt{&} \hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{5}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlstd{)} \hlopt{&}
+        \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{1}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlstd{)}\hlopt{&}\hlstd{(}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{2}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlstd{)))\{}
+    \hlstd{model} \hlkwb{<-} \hlkwd{lmer}\hlstd{(x}\hlopt{~} \hlstd{cy} \hlopt{+} \hlstd{line} \hlopt{+} \hlstd{(}\hlnum{1}\hlopt{|}\hlstd{animal),} \hlkwc{na.action}\hlstd{=}\hlstr{"na.omit"}\hlstd{)}
+    \hlcom{#str(summary(model))}
+\hlcom{#    mean_est <- summary(model)$coeff[1,1] + }
+ \hlcom{#     summary(model)$coeff[2,1]/2 + }
+  \hlcom{#    summary(model)$coeff[3,1]/2}
+
+    \hlstd{sd_est} \hlkwb{<-} \hlkwd{as.vector}\hlstd{(}\hlkwd{sqrt}\hlstd{(}\hlkwd{t}\hlstd{(}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,} \hlnum{1}\hlopt{/}\hlnum{2}\hlstd{,} \hlnum{1}\hlopt{/}\hlnum{2}\hlstd{))}\hlopt{%*%} \hlkwd{summary}\hlstd{(model)}\hlopt{$}\hlstd{vcov} \hlopt{%*%}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlopt{/}\hlnum{2}\hlstd{,} \hlnum{1}\hlopt{/}\hlnum{2}\hlstd{)))  \}}
+
+
+  \hlkwd{return}\hlstd{( sd_est)}
+\hlstd{\}}
+\hlstd{sd_depleted} \hlkwb{<-} \hlkwd{laply}\hlstd{(}\hlnum{1}\hlopt{:}\hlkwd{dim}\hlstd{(dat_final)[}\hlnum{1}\hlstd{],} \hlkwa{function}\hlstd{(}\hlkwc{i}\hlstd{)}\hlkwd{out_model}\hlstd{(deplete[i,],} \hlkwc{depleted} \hlstd{=} \hlstr{"TRUE"}\hlstd{))}
+
+\hlstd{sd_whole} \hlkwb{<-} \hlkwd{laply}\hlstd{(}\hlnum{1}\hlopt{:}\hlkwd{dim}\hlstd{(dat_final)[}\hlnum{1}\hlstd{],} \hlkwa{function}\hlstd{(}\hlkwc{i}\hlstd{)}\hlkwd{out_model}\hlstd{(whole[i,],} \hlkwc{depleted} \hlstd{=} \hlstr{"FALSE"}\hlstd{))}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+
+\section{Results of Comparison of Standard Errors between Two Sample Types}
+\subsection{Proportion of protein spots whose standard error in the depleted samples larger than that one  in the whole samples}
+Proportion of protein spots whose standard error in the depleted samples larger than that one  in the whole samples.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{mean}\hlstd{(sd_depleted} \hlopt{>} \hlstd{sd_whole)}
+\end{alltt}
+\begin{verbatim}
+## [1] 0.5941
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+Figure \ref{fig:fg1} show the log of standard error of all protein spots in 2 sample types.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{log_sd} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}
+  \hlkwc{logsd} \hlstd{=} \hlkwd{log}\hlstd{(}\hlkwd{c}\hlstd{(sd_whole, sd_depleted)),}
+  \hlkwc{sample} \hlstd{=} \hlkwd{rep}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"whole"}\hlstd{,} \hlstr{"depleted"}\hlstd{),} \hlkwc{each} \hlstd{=} \hlkwd{length}\hlstd{(sd_whole)))}
+\hlcom{# write.table(log_sd, file = "log_sd.txt")}
+
+\hlstd{p} \hlkwb{<-} \hlkwd{ggplot}\hlstd{(log_sd,} \hlkwd{aes}\hlstd{(sample, logsd))}
+\hlstd{p} \hlopt{+} \hlkwd{geom_boxplot}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{fill} \hlstd{= sample))} \hlopt{+}
+  \hlkwd{ggtitle}\hlstd{(}\hlstr{"Standard Error for Each Sample Type"}\hlstd{)} \hlopt{+}
+  \hlkwd{scale_fill_discrete}\hlstd{(}\hlkwc{name}\hlstd{=} \hlstr{"Sample Type"}\hlstd{)} \hlopt{+}
+  \hlkwd{xlab}\hlstd{(}\hlstr{"Sample Type"}\hlstd{)} \hlopt{+}
+  \hlkwd{ylab}\hlstd{(}\hlstr{"log(Standard Error)"}\hlstd{)} \hlopt{+}
+  \hlkwd{theme}\hlstd{(}\hlkwc{text} \hlstd{=} \hlkwd{element_text}\hlstd{(}\hlkwc{size}\hlstd{=}\hlnum{11}\hlstd{))}
+\end{alltt}
+\end{kframe}\begin{figure}[h]
+
+\includegraphics[width=\maxwidth]{figure/fg1} \caption[Log(Standard Error) for Each Sample Type]{Log(Standard Error) for Each Sample Type\label{fig:fg1}}
+\end{figure}
+
+
+\end{knitrout}
+
+\subsection{One-sided Wilcoxon test}
+Consider a Wilcoxon signed-rank test H0: The distribution of the  standard errors across protein   is the same for  depleted samples and whole samples, H1: the standard errors tend to be larger for depleted samples than for whole samples.  The test using log-transformed standard errors has p-value = 0.004275. 
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# One-sided Test for the log-transformed standard errors}
+\hlkwd{wilcox.test}\hlstd{(}\hlkwd{log}\hlstd{(sd_depleted}\hlopt{/}\hlstd{sd_whole),} \hlkwc{alternative} \hlstd{=} \hlstr{"greater"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## 
+## 	Wilcoxon signed rank test with continuity correction
+## 
+## data:  log(sd_depleted/sd_whole)
+## V = 17154, p-value = 0.004275
+## alternative hypothesis: true location is greater than 0
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+\subsection{Boxplot for logsd(deplete$/$whole)}
+Figure \ref{fig:fg2} show the log ratio of the standard errors of two sample types.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{logratiosd} \hlkwb{<-} \hlkwd{log}\hlstd{(sd_depleted}\hlopt{/}\hlstd{sd_whole)}
+\hlkwd{boxplot}\hlstd{(logratiosd,} \hlkwc{main} \hlstd{=} \hlstr{"Log(sd_depleted/sd_whole)"}\hlstd{)}
+\hlkwd{abline}\hlstd{(}\hlkwc{h} \hlstd{=} \hlnum{0}\hlstd{)}
+\end{alltt}
+\end{kframe}\begin{figure}[h]
+
+\includegraphics[width=\maxwidth]{figure/fg2} \caption[Log Ratio of Standard Error for Each Sample Type]{Log Ratio of Standard Error for Each Sample Type\label{fig:fg2}}
+\end{figure}
+
+
+\end{knitrout}
+
+\end{document}

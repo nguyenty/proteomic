@@ -4,7 +4,7 @@ library("ggplot2")
 library("MASS")
 # read data
 
-dat <- read.csv("Proteins of Interst for Tech Paper.csv")
+dat <- read.csv("239 tech paper_08_19_2014.csv")
 
 dim(dat)
 
@@ -111,13 +111,14 @@ out_model <- function(x, depleted){ # x is the row of data (i.e., data of each p
   return(c(mean_est, sd_est))
 }
 
-depleted_out <- laply(1:236, function(i)out_model(deplete[i,], depleted = "TRUE"))
+depleted_out <- laply(1:dim(dat_final)[1], function(i)out_model(deplete[i,], depleted = "TRUE"))
 
-whole_out <- laply(1:236, function(i)out_model(whole[i,], depleted = "FALSE"))
+whole_out <- laply(1:dim(dat_final)[1], function(i)out_model(whole[i,], depleted = "FALSE"))
 
-colnames(depleted_out) <- colnames(whole_out) <- c("mean","sd")
+colnames(depleted_out) <- colnames(whole_out) <- c("lsmean","logsd")
 sd_out <- data.frame(
-  logsd = log(c(whole_out[, "sd"], depleted_out[,"sd"])), 
+  logsd = log(c(whole_out[, "logsd"], depleted_out[,"logsd"])),
+  lsmean = c(whole_out[, "lsmean"], depleted_out[,"lsmean"]),
   sample = rep(c("whole", "depleted"), each = dim(whole_out)[1]))
 
 p <- ggplot(sd_out, aes(sample, logsd))
@@ -128,7 +129,16 @@ p + geom_boxplot(aes(fill = sample)) +
   ylab("log(Standard Error)") + 
   theme(text = element_text(size=18))
 
+qplot(lsmean, logsd, data=sd_out, colour=sample, 
+      xlim =c(-10, 10))
 
+p1 <- ggplot(sd_out, aes(lsmean, logsd), colour = sample) + 
+  geom_point(aes(colour = sample)) + 
+  xlim(-10, 10)+ 
+  theme(text = element_text(size=18))+ 
+  ggtitle("Logsd vs. abundance of protein spots") +
+  geom_smooth()
+p1
 wilcox.test(log(depleted_out[,2]), log(whole_out[, 2]), alternative = "greater", paired = TRUE)
 wilcox.test(depleted_out[,2], whole_out[, 2], alternative = "two.sided", paired = TRUE)
 
