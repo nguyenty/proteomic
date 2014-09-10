@@ -228,3 +228,9 @@ deplete[24,]
 
 ##Low RFI = 1209, 4810, 1906, 1807
 ##High RFI = 3106, 3908, 2107, 2712
+
+## linear mixed effect model 
+model <- lmer(deplete[1,]~ cy + line + (1|animal), na.action="na.omit")
+
+
+

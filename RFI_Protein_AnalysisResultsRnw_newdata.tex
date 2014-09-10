@@ -71,9 +71,9 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{bmpsize}
+\usepackage{float}
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \begin{document}
-
 
 
 
@@ -83,7 +83,6 @@
 \title{Analyze Protein Data}%replace X with the appropriate number
 \author{} 
 \maketitle
-
 
 
 
@@ -147,7 +146,6 @@
 \end{knitrout}
 
 
-
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -188,7 +186,6 @@
 \end{kframe}
 \end{knitrout}
 
-
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -203,13 +200,8 @@
 \begin{verbatim}
 ## [1] 239  33
 \end{verbatim}
-\begin{alltt}
-
-
-\end{alltt}
 \end{kframe}
 \end{knitrout}
-
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -272,13 +264,12 @@
 \end{kframe}
 \end{knitrout}
 
-
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlcom{# Find out which Cy is used for each run}
 
-\hlstd{group[group} \hlopt{==} \hlstr{"Depleted"}\hlstd{]}  \hlcom{# Cy for depleted sample : rep(c(5,5,3,3),4)}
+\hlstd{group[group}\hlopt{==}\hlstr{"Depleted"}\hlstd{]} \hlcom{# Cy for depleted sample : rep(c(5,5,3,3),4)}
 \end{alltt}
 \begin{verbatim}
 ## Gel_1_Run_1_Pig_1807_45034.CY5.gel Gel_1_Run_2_Pig_1807_45046.CY5.gel 
@@ -299,7 +290,7 @@
 ##                         "Depleted"                         "Depleted"
 \end{verbatim}
 \begin{alltt}
-\hlstd{group[group} \hlopt{==} \hlstr{"Whole"}\hlstd{]}  \hlcom{# Cy for whole sample : rep(c(3,3,5,5),4)}
+\hlstd{group[group}\hlopt{==}\hlstr{"Whole"}\hlstd{]} \hlcom{# Cy for whole sample : rep(c(3,3,5,5),4)}
 \end{alltt}
 \begin{verbatim}
 ## Gel_1_Run_1_Pig_1807_45034.CY3.gel Gel_1_Run_2_Pig_1807_45046.CY3.gel 
@@ -321,7 +312,6 @@
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
-
 \section{Function to fit a Linear Mixed Effect Model for each spot in each sample }
 Function to fit a linear mixed model for each spot, with fixed effects are Cy, RFI Line and the random effect is animal.
 
@@ -338,48 +328,54 @@ Function to fit a linear mixed model for each spot, with fixed effects are Cy, R
   \hlstd{line} \hlkwb{<-} \hlkwd{as.factor}\hlstd{(}\hlkwd{rep}\hlstd{(}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{2}\hlstd{),} \hlkwc{each} \hlstd{=} \hlnum{8}\hlstd{))}
   \hlcom{# check if all obsetvations for one Cy are missing or not}
 
-  \hlkwa{if} \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{3}\hlstd{]))}\hlopt{==}\hlnum{8}\hlopt{|}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{5}\hlstd{]))}\hlopt{==}\hlnum{8}\hlstd{)} \hlopt{&}
-        \hlstd{(}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{1}\hlstd{]))}\hlopt{==}\hlnum{8}\hlopt{|}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{2}\hlstd{]))}\hlopt{==}\hlnum{8}\hlstd{))\{}
+  \hlkwa{if} \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{3}\hlstd{]))}\hlopt{==}\hlnum{8}\hlopt{|}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{5}\hlstd{]))}\hlopt{==}\hlnum{8}\hlstd{)} \hlopt{&} \hlcom{# if all cy is missing}
+        \hlstd{(}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{1}\hlstd{]))}\hlopt{==}\hlnum{8}\hlopt{|}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{2}\hlstd{]))}\hlopt{==}\hlnum{8}\hlstd{))\{}\hlcom{# if all Line is missing}
     \hlstd{model} \hlkwb{<-} \hlkwd{lmer}\hlstd{(x}\hlopt{~} \hlstd{(}\hlnum{1}\hlopt{|}\hlstd{animal),} \hlkwc{na.action}\hlstd{=}\hlstr{"na.omit"}\hlstd{)}
-    \hlcom{#mean_est <- summary(model)$coeff[,1]}
-    \hlstd{sd_est} \hlkwb{<-} \hlkwd{as.vector}\hlstd{(}\hlkwd{sqrt}\hlstd{(}\hlkwd{summary}\hlstd{(model)}\hlopt{$}\hlstd{vcov))}
-    \hlcom{#str(summary(model))}
+    \hlstd{s_model} \hlkwb{<-} \hlkwd{summary}\hlstd{(model)}
+    \hlstd{mean_est} \hlkwb{<-} \hlstd{s_model}\hlopt{$}\hlstd{coeff[,}\hlnum{1}\hlstd{]}
+    \hlstd{sd_est} \hlkwb{<-} \hlkwd{as.vector}\hlstd{(}\hlkwd{sqrt}\hlstd{(s_model}\hlopt{$}\hlstd{vcov))}
+    \hlcom{#str(s_model)}
   \hlstd{\}}
-  \hlkwa{if} \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{3}\hlstd{]))}\hlopt{==}\hlnum{8}\hlopt{|}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{5}\hlstd{]))}\hlopt{==}\hlnum{8}\hlstd{)} \hlopt{&}
-        \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{1}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlstd{)}\hlopt{&}\hlstd{(}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{2}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlstd{)))\{}
+  \hlkwa{if} \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{3}\hlstd{]))}\hlopt{==}\hlnum{8}\hlopt{|}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{5}\hlstd{]))}\hlopt{==}\hlnum{8}\hlstd{)} \hlopt{&} \hlcom{# if cy is missing}
+        \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{1}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlstd{)}\hlopt{&}\hlstd{(}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{2}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlstd{)))\{} \hlcom{# if line is not missing}
     \hlstd{model} \hlkwb{<-} \hlkwd{lmer}\hlstd{(x}\hlopt{~} \hlstd{line} \hlopt{+} \hlstd{(}\hlnum{1}\hlopt{|}\hlstd{animal),} \hlkwc{na.action}\hlstd{=}\hlstr{"na.omit"}\hlstd{)}
-    \hlcom{#mean_est <- summary(model)$coeff[1,1] + summary(model)$coeff[2,1]/2}
-    \hlstd{sd_est} \hlkwb{<-} \hlkwd{as.vector}\hlstd{(}\hlkwd{sqrt}\hlstd{(}\hlkwd{t}\hlstd{(}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlopt{/}\hlnum{2}\hlstd{))} \hlopt{%*%}\hlkwd{summary}\hlstd{(model)}\hlopt{$}\hlstd{vcov}\hlopt{%*%}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlopt{/}\hlnum{2}\hlstd{)))}
+    \hlstd{s_model} \hlkwb{<-} \hlkwd{summary}\hlstd{(model)}
+    \hlstd{mean_est} \hlkwb{<-} \hlstd{s_model}\hlopt{$}\hlstd{coeff[}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{]} \hlopt{+} \hlstd{s_model}\hlopt{$}\hlstd{coeff[}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{]}\hlopt{/}\hlnum{2}
+    \hlstd{sd_est} \hlkwb{<-} \hlkwd{as.vector}\hlstd{(}\hlkwd{sqrt}\hlstd{(}\hlkwd{t}\hlstd{(}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlopt{/}\hlnum{2}\hlstd{))} \hlopt{%*%}\hlstd{s_model}\hlopt{$}\hlstd{vcov}\hlopt{%*%}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlopt{/}\hlnum{2}\hlstd{)))}
   \hlstd{\}}
 
-  \hlkwa{if} \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{3}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlopt{|}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{5}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlstd{)} \hlopt{&}
-        \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{1}\hlstd{]))}\hlopt{==}\hlnum{8}\hlstd{)}\hlopt{&}\hlstd{(}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{2}\hlstd{]))}\hlopt{==}\hlnum{8}\hlstd{)))\{}
+  \hlkwa{if} \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{3}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlopt{&}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{5}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlstd{)} \hlopt{&}  \hlcom{# if cy is not missing}
+        \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{1}\hlstd{]))}\hlopt{==}\hlnum{8}\hlstd{)}\hlopt{|}\hlstd{(}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{2}\hlstd{]))}\hlopt{==}\hlnum{8}\hlstd{)))\{} \hlcom{# if line is missing}
     \hlstd{model} \hlkwb{<-} \hlkwd{lmer}\hlstd{(x}\hlopt{~} \hlstd{cy} \hlopt{+} \hlstd{(}\hlnum{1}\hlopt{|}\hlstd{animal),} \hlkwc{na.action}\hlstd{=}\hlstr{"na.omit"}\hlstd{)}
-    \hlcom{#mean_est <- summary(model)$coeff[1,1] + summary(model)$coeff[2,1]/2}
-    \hlstd{sd_est} \hlkwb{<-} \hlkwd{as.vector}\hlstd{(}\hlkwd{sqrt}\hlstd{(}\hlkwd{t}\hlstd{(}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlopt{/}\hlnum{2}\hlstd{))} \hlopt{%*%}\hlkwd{summary}\hlstd{(model)}\hlopt{$}\hlstd{vcov}\hlopt{%*%}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlopt{/}\hlnum{2}\hlstd{)))}
+    \hlstd{s_model} \hlkwb{<-} \hlkwd{summary}\hlstd{(model)}
+    \hlstd{mean_est} \hlkwb{<-} \hlstd{s_model}\hlopt{$}\hlstd{coeff[}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{]} \hlopt{+} \hlstd{s_model}\hlopt{$}\hlstd{coeff[}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{]}\hlopt{/}\hlnum{2}
+    \hlstd{sd_est} \hlkwb{<-} \hlkwd{as.vector}\hlstd{(}\hlkwd{sqrt}\hlstd{(}\hlkwd{t}\hlstd{(}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlopt{/}\hlnum{2}\hlstd{))} \hlopt{%*%}\hlstd{s_model}\hlopt{$}\hlstd{vcov}\hlopt{%*%}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlopt{/}\hlnum{2}\hlstd{)))}
   \hlstd{\}}
 
   \hlkwa{if} \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{3}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlopt{&} \hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[cy}\hlopt{==}\hlnum{5}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlstd{)} \hlopt{&}
         \hlstd{((}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{1}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlstd{)}\hlopt{&}\hlstd{(}\hlkwd{sum}\hlstd{(}\hlkwd{is.na}\hlstd{(x[line}\hlopt{==}\hlnum{2}\hlstd{]))}\hlopt{!=}\hlnum{8}\hlstd{)))\{}
     \hlstd{model} \hlkwb{<-} \hlkwd{lmer}\hlstd{(x}\hlopt{~} \hlstd{cy} \hlopt{+} \hlstd{line} \hlopt{+} \hlstd{(}\hlnum{1}\hlopt{|}\hlstd{animal),} \hlkwc{na.action}\hlstd{=}\hlstr{"na.omit"}\hlstd{)}
-    \hlcom{#str(summary(model))}
-\hlcom{#    mean_est <- summary(model)$coeff[1,1] + }
- \hlcom{#     summary(model)$coeff[2,1]/2 + }
-  \hlcom{#    summary(model)$coeff[3,1]/2}
+    \hlstd{s_model} \hlkwb{<-} \hlkwd{summary}\hlstd{(model)}
+    \hlcom{#str(s_model)}
+   \hlstd{mean_est} \hlkwb{<-} \hlstd{s_model}\hlopt{$}\hlstd{coeff[}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{]} \hlopt{+}
+     \hlstd{s_model}\hlopt{$}\hlstd{coeff[}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{]}\hlopt{/}\hlnum{2} \hlopt{+}
+     \hlstd{s_model}\hlopt{$}\hlstd{coeff[}\hlnum{3}\hlstd{,}\hlnum{1}\hlstd{]}\hlopt{/}\hlnum{2}
 
-    \hlstd{sd_est} \hlkwb{<-} \hlkwd{as.vector}\hlstd{(}\hlkwd{sqrt}\hlstd{(}\hlkwd{t}\hlstd{(}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,} \hlnum{1}\hlopt{/}\hlnum{2}\hlstd{,} \hlnum{1}\hlopt{/}\hlnum{2}\hlstd{))}\hlopt{%*%} \hlkwd{summary}\hlstd{(model)}\hlopt{$}\hlstd{vcov} \hlopt{%*%}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlopt{/}\hlnum{2}\hlstd{,} \hlnum{1}\hlopt{/}\hlnum{2}\hlstd{)))  \}}
+    \hlstd{sd_est} \hlkwb{<-} \hlkwd{as.vector}\hlstd{(}\hlkwd{sqrt}\hlstd{(}\hlkwd{t}\hlstd{(}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,} \hlnum{1}\hlopt{/}\hlnum{2}\hlstd{,} \hlnum{1}\hlopt{/}\hlnum{2}\hlstd{))}\hlopt{%*%} \hlstd{s_model}\hlopt{$}\hlstd{vcov} \hlopt{%*%}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlopt{/}\hlnum{2}\hlstd{,} \hlnum{1}\hlopt{/}\hlnum{2}\hlstd{)))  \}}
 
 
-  \hlkwd{return}\hlstd{( sd_est)}
+  \hlkwd{return}\hlstd{(}\hlkwd{c}\hlstd{(sd_est, mean_est))}
 \hlstd{\}}
-\hlstd{sd_depleted} \hlkwb{<-} \hlkwd{laply}\hlstd{(}\hlnum{1}\hlopt{:}\hlkwd{dim}\hlstd{(dat_final)[}\hlnum{1}\hlstd{],} \hlkwa{function}\hlstd{(}\hlkwc{i}\hlstd{)}\hlkwd{out_model}\hlstd{(deplete[i,],} \hlkwc{depleted} \hlstd{=} \hlstr{"TRUE"}\hlstd{))}
+\hlstd{sd_depleted} \hlkwb{<-} \hlkwd{laply}\hlstd{(}\hlnum{1}\hlopt{:}\hlkwd{dim}\hlstd{(dat_final)[}\hlnum{1}\hlstd{],} \hlkwa{function}\hlstd{(}\hlkwc{i}\hlstd{)}\hlkwd{out_model}\hlstd{(deplete[i,],} \hlkwc{depleted} \hlstd{=} \hlstr{"TRUE"}\hlstd{)[}\hlnum{1}\hlstd{])}
 
-\hlstd{sd_whole} \hlkwb{<-} \hlkwd{laply}\hlstd{(}\hlnum{1}\hlopt{:}\hlkwd{dim}\hlstd{(dat_final)[}\hlnum{1}\hlstd{],} \hlkwa{function}\hlstd{(}\hlkwc{i}\hlstd{)}\hlkwd{out_model}\hlstd{(whole[i,],} \hlkwc{depleted} \hlstd{=} \hlstr{"FALSE"}\hlstd{))}
+\hlstd{sd_whole} \hlkwb{<-} \hlkwd{laply}\hlstd{(}\hlnum{1}\hlopt{:}\hlkwd{dim}\hlstd{(dat_final)[}\hlnum{1}\hlstd{],} \hlkwa{function}\hlstd{(}\hlkwc{i}\hlstd{)}\hlkwd{out_model}\hlstd{(whole[i,],} \hlkwc{depleted} \hlstd{=} \hlstr{"FALSE"}\hlstd{)[}\hlnum{1}\hlstd{])}
+
+\hlstd{lsmean_depleted} \hlkwb{<-} \hlkwd{laply}\hlstd{(}\hlnum{1}\hlopt{:}\hlkwd{dim}\hlstd{(dat_final)[}\hlnum{1}\hlstd{],} \hlkwa{function}\hlstd{(}\hlkwc{i}\hlstd{)}\hlkwd{out_model}\hlstd{(deplete[i,],} \hlkwc{depleted} \hlstd{=} \hlstr{"TRUE"}\hlstd{)[}\hlnum{2}\hlstd{])}
+
+\hlstd{lsmean_whole} \hlkwb{<-} \hlkwd{laply}\hlstd{(}\hlnum{1}\hlopt{:}\hlkwd{dim}\hlstd{(dat_final)[}\hlnum{1}\hlstd{],} \hlkwa{function}\hlstd{(}\hlkwc{i}\hlstd{)}\hlkwd{out_model}\hlstd{(whole[i,],} \hlkwc{depleted} \hlstd{=} \hlstr{"FALSE"}\hlstd{)[}\hlnum{2}\hlstd{])}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
-
-
 
 \section{Results of Comparison of Standard Errors between Two Sample Types}
 \subsection{Proportion of protein spots whose standard error in the depleted samples larger than that one  in the whole samples}
@@ -394,7 +390,6 @@ Proportion of protein spots whose standard error in the depleted samples larger 
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
-
 
 Figure \ref{fig:fg1} show the log of standard error of all protein spots in 2 sample types.
 
@@ -414,14 +409,13 @@ Figure \ref{fig:fg1} show the log of standard error of all protein spots in 2 sa
   \hlkwd{ylab}\hlstd{(}\hlstr{"log(Standard Error)"}\hlstd{)} \hlopt{+}
   \hlkwd{theme}\hlstd{(}\hlkwc{text} \hlstd{=} \hlkwd{element_text}\hlstd{(}\hlkwc{size}\hlstd{=}\hlnum{11}\hlstd{))}
 \end{alltt}
-\end{kframe}\begin{figure}[h]
+\end{kframe}\begin{figure}[H]
 
 \includegraphics[width=\maxwidth]{figure/fg1} \caption[Log(Standard Error) for Each Sample Type]{Log(Standard Error) for Each Sample Type\label{fig:fg1}}
 \end{figure}
 
 
 \end{knitrout}
-
 \subsection{One-sided Wilcoxon test}
 Consider a Wilcoxon signed-rank test H0: The distribution of the  standard errors across protein   is the same for  depleted samples and whole samples, H1: the standard errors tend to be larger for depleted samples than for whole samples.  The test using log-transformed standard errors has p-value = 0.004275. 
 
@@ -442,22 +436,144 @@ Consider a Wilcoxon signed-rank test H0: The distribution of the  standard error
 \end{kframe}
 \end{knitrout}
 
+% \subsection{Boxplot for logsd(deplete$/$whole)}
+% Figure \ref{fig:fg2} show the log ratio of the standard errors of two sample types.
+% 
+% <<fg2, tidy=FALSE,fig.cap= "Log Ratio of Standard Error for Each Sample Type",fig.pos='h'>>=
+% 
+% logratiosd <- log(sd_depleted/sd_whole)
+% boxplot(logratiosd, main = "Log(sd_depleted/sd_whole)")
+% abline(h = 0)
+% @
+% 
 
-\subsection{Boxplot for logsd(deplete$/$whole)}
-Figure \ref{fig:fg2} show the log ratio of the standard errors of two sample types.
+
+
+\section{Results of Comparison of lsmean between Two Sample Types}
+\subsection{Proportion of protein spots whose lsmean in the depleted samples larger than that one  in the whole samples}
+Proportion of protein spots whose lsmean in the depleted samples larger than that one  in the whole samples.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{mean}\hlstd{(lsmean_depleted} \hlopt{>} \hlstd{lsmean_whole)}
+\end{alltt}
+\begin{verbatim}
+## [1] 0.569
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+Figure \ref{fig:fg3} shows the  lsmean of all protein spots in 2 sample types.  
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{logratiosd} \hlkwb{<-} \hlkwd{log}\hlstd{(sd_depleted}\hlopt{/}\hlstd{sd_whole)}
-\hlkwd{boxplot}\hlstd{(logratiosd,} \hlkwc{main} \hlstd{=} \hlstr{"Log(sd_depleted/sd_whole)"}\hlstd{)}
-\hlkwd{abline}\hlstd{(}\hlkwc{h} \hlstd{=} \hlnum{0}\hlstd{)}
-\end{alltt}
-\end{kframe}\begin{figure}[h]
+\hlstd{ls_mean} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}
+  \hlkwc{lsmean} \hlstd{= (}\hlkwd{c}\hlstd{(lsmean_whole, lsmean_depleted)),}
+  \hlkwc{sample} \hlstd{=} \hlkwd{rep}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"whole"}\hlstd{,} \hlstr{"depleted"}\hlstd{),} \hlkwc{each} \hlstd{=} \hlkwd{length}\hlstd{(lsmean_whole)))}
+\hlcom{# write.table(log_sd, file = "log_sd.txt")}
 
-\includegraphics[width=\maxwidth]{figure/fg2} \caption[Log Ratio of Standard Error for Each Sample Type]{Log Ratio of Standard Error for Each Sample Type\label{fig:fg2}}
+\hlstd{p} \hlkwb{<-} \hlkwd{ggplot}\hlstd{(ls_mean,} \hlkwd{aes}\hlstd{(sample, lsmean))}
+\hlstd{p} \hlopt{+} \hlkwd{geom_boxplot}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{fill} \hlstd{= sample))} \hlopt{+}
+  \hlkwd{ggtitle}\hlstd{(}\hlstr{"All data"}\hlstd{)} \hlopt{+}
+  \hlkwd{scale_fill_discrete}\hlstd{(}\hlkwc{name}\hlstd{=} \hlstr{"Sample Type"}\hlstd{)} \hlopt{+}
+  \hlkwd{xlab}\hlstd{(}\hlstr{"Sample Type"}\hlstd{)} \hlopt{+}
+  \hlkwd{ylab}\hlstd{(}\hlstr{"lsmean"}\hlstd{)} \hlopt{+}
+  \hlkwd{theme}\hlstd{(}\hlkwc{text} \hlstd{=} \hlkwd{element_text}\hlstd{(}\hlkwc{size}\hlstd{=}\hlnum{11}\hlstd{))}
+\end{alltt}
+\end{kframe}\begin{figure}[H]
+
+\includegraphics[width=\maxwidth]{figure/fg3} \caption[lsmean for Each Sample Type]{lsmean for Each Sample Type\label{fig:fg3}}
 \end{figure}
 
+
+\end{knitrout}
+
+Figure \ref{fig:fg4} shows the  lsmean of all protein spots in 2 sample types, excluding the spots whose lsmean of depleted sample less than or equal -10.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{ls_mean} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}
+  \hlkwc{lsmean} \hlstd{= (}\hlkwd{c}\hlstd{(lsmean_whole[lsmean_depleted} \hlopt{>-}\hlnum{10}\hlstd{], lsmean_depleted[lsmean_depleted} \hlopt{>-}\hlnum{10}\hlstd{])),}
+  \hlkwc{sample} \hlstd{=} \hlkwd{rep}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"whole"}\hlstd{,} \hlstr{"depleted"}\hlstd{),} \hlkwc{each} \hlstd{=} \hlkwd{length}\hlstd{(lsmean_whole[lsmean_depleted} \hlopt{>-}\hlnum{10}\hlstd{])))}
+\hlcom{# write.table(log_sd, file = "log_sd.txt")}
+
+\hlstd{p} \hlkwb{<-} \hlkwd{ggplot}\hlstd{(ls_mean,} \hlkwd{aes}\hlstd{(sample, lsmean))}
+\hlstd{p} \hlopt{+} \hlkwd{geom_boxplot}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{fill} \hlstd{= sample))} \hlopt{+}
+  \hlkwd{ggtitle}\hlstd{(}\hlstr{"Data excluding Values less than -10"}\hlstd{)} \hlopt{+}
+  \hlkwd{scale_fill_discrete}\hlstd{(}\hlkwc{name}\hlstd{=} \hlstr{"Sample Type"}\hlstd{)} \hlopt{+}
+  \hlkwd{xlab}\hlstd{(}\hlstr{"Sample Type"}\hlstd{)} \hlopt{+}
+  \hlkwd{ylab}\hlstd{(}\hlstr{"lsmean"}\hlstd{)} \hlopt{+}
+  \hlkwd{theme}\hlstd{(}\hlkwc{text} \hlstd{=} \hlkwd{element_text}\hlstd{(}\hlkwc{size}\hlstd{=}\hlnum{11}\hlstd{))}
+\end{alltt}
+\end{kframe}\begin{figure}[H]
+
+\includegraphics[width=\maxwidth]{figure/fg4} \caption[lsmean for Each Sample Type, deleted too small values]{lsmean for Each Sample Type, deleted too small values\label{fig:fg4}}
+\end{figure}
+
+
+\end{knitrout}
+
+
+
+\subsection{One-sided Wilcoxon test for the lsmean}
+Consider a Wilcoxon signed-rank test H0: The distribution of the  standardized abundance level across protein   is the same for  depleted samples and whole samples, H1: the standardized abundance level tend to be larger for depleted samples than for whole samples. P-value is 0.1964 for the subset of data excluding those with estimated abundance less than -10 as in Figure \ref{fig:fg4}, and is 0.476 for all data.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# One-sided Test for the log-transformed standard errors}
+\hlkwd{wilcox.test}\hlstd{(lsmean_depleted[lsmean_depleted} \hlopt{>-}\hlnum{10}\hlstd{],}
+            \hlstd{lsmean_whole[lsmean_depleted} \hlopt{>-}\hlnum{10}\hlstd{],}
+            \hlkwc{alternative} \hlstd{=}\hlstr{"greater"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## 
+## 	Wilcoxon rank sum test with continuity correction
+## 
+## data:  lsmean_depleted[lsmean_depleted > -10] and lsmean_whole[lsmean_depleted > -10]
+## W = 28387, p-value = 0.1964
+## alternative hypothesis: true location shift is greater than 0
+\end{verbatim}
+\begin{alltt}
+\hlkwd{wilcox.test}\hlstd{(lsmean_depleted,}
+            \hlstd{lsmean_whole,}
+            \hlkwc{alternative} \hlstd{=}\hlstr{"greater"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## 
+## 	Wilcoxon rank sum test with continuity correction
+## 
+## data:  lsmean_depleted and lsmean_whole
+## W = 28652, p-value = 0.476
+## alternative hypothesis: true location shift is greater than 0
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+\section{Plot logsd of LSmean vs LSmean for the data excluding LSmean less than -10}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{res_out} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}
+  \hlkwc{logsd} \hlstd{=} \hlkwd{log}\hlstd{(}\hlkwd{c}\hlstd{(sd_whole, sd_depleted)),}
+  \hlkwc{lsmean} \hlstd{=} \hlkwd{c}\hlstd{(lsmean_whole,lsmean_depleted),}
+  \hlkwc{sample} \hlstd{=} \hlkwd{rep}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"whole"}\hlstd{,} \hlstr{"depleted"}\hlstd{),} \hlkwc{each} \hlstd{=} \hlkwd{length}\hlstd{(sd_whole)))}
+
+
+\hlstd{p1} \hlkwb{<-} \hlkwd{ggplot}\hlstd{(res_out,} \hlkwd{aes}\hlstd{(lsmean, logsd),} \hlkwc{colour} \hlstd{= sample)} \hlopt{+}
+  \hlkwd{geom_point}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{colour} \hlstd{= sample))} \hlopt{+}
+  \hlkwd{xlim}\hlstd{(}\hlopt{-}\hlnum{10}\hlstd{,} \hlnum{10}\hlstd{)}\hlopt{+}
+  \hlkwd{theme}\hlstd{(}\hlkwc{text} \hlstd{=} \hlkwd{element_text}\hlstd{(}\hlkwc{size}\hlstd{=}\hlnum{18}\hlstd{))}\hlopt{+}
+  \hlkwd{ggtitle}\hlstd{(}\hlstr{"Logsd vs. abundance of protein spots"}\hlstd{)} \hlopt{+}
+  \hlkwd{geom_smooth}\hlstd{()}
+\hlstd{p1}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-12} 
 
 \end{knitrout}
 
