@@ -74,7 +74,7 @@ out_model <- function(x, depleted){ # x is the row of data (i.e., data of each p
   }
   animal <- as.factor(rep(1:8, each = 2))
   line <- as.factor(rep(c(1,2), each = 8))
-  # check if all obsetvations for one Cy are missing or not
+  # check if all obsetvations for one Cy and all observation for line  are missing or not
   
   if ((sum(is.na(x[cy==3]))==8|sum(is.na(x[cy==5]))==8) & 
         (sum(is.na(x[line==1]))==8|sum(is.na(x[line==2]))==8)){
@@ -83,6 +83,8 @@ out_model <- function(x, depleted){ # x is the row of data (i.e., data of each p
     sd_est <- as.vector(sqrt(summary(model)$vcov))
     #str(summary(model))
   } 
+  
+  # check if all observation for one cy missing and for line not missing
   if ((sum(is.na(x[cy==3]))==8|sum(is.na(x[cy==5]))==8) & 
         ((sum(is.na(x[line==1]))!=8)&(sum(is.na(x[line==2]))!=8))){
     model <- lmer(x~ line + (1|animal), na.action="na.omit")
@@ -90,8 +92,9 @@ out_model <- function(x, depleted){ # x is the row of data (i.e., data of each p
     sd_est <- as.vector(sqrt(t(c(1,1/2)) %*%summary(model)$vcov%*%c(1,1/2)))
   }
   
-  if ((sum(is.na(x[cy==3]))!=8|sum(is.na(x[cy==5]))!=8) & 
-        ((sum(is.na(x[line==1]))==8)&(sum(is.na(x[line==2]))==8))){
+  # check if all observation for Cy not missing, Line missing
+  if ((sum(is.na(x[cy==3]))!=8&sum(is.na(x[cy==5]))!=8) & 
+        ((sum(is.na(x[line==1]))==8)|(sum(is.na(x[line==2]))==8))){
     model <- lmer(x~ cy + (1|animal), na.action="na.omit")
     mean_est <- summary(model)$coeff[1,1] + summary(model)$coeff[2,1]/2
     sd_est <- as.vector(sqrt(t(c(1,1/2)) %*%summary(model)$vcov%*%c(1,1/2)))
@@ -111,6 +114,7 @@ out_model <- function(x, depleted){ # x is the row of data (i.e., data of each p
   return(c(mean_est, sd_est))
 }
 
+#sum(whole_nocy_ind)
 depleted_out <- laply(1:dim(dat_final)[1], function(i)out_model(deplete[i,], depleted = "TRUE"))
 
 whole_out <- laply(1:dim(dat_final)[1], function(i)out_model(whole[i,], depleted = "FALSE"))
@@ -145,7 +149,7 @@ wilcox.test(log(depleted_out[,2]/whole_out[, 2]), alternative = "greater")
 
 p <- ggplot(sd_out, aes(sample, lsmean))
 
-p <- ggplot(subset(sd_out, , aes(sample, lsmean))
+# p <- ggplot(subset(sd_out, , aes(sample, lsmean))
 
 p + geom_boxplot(aes(fill = sample)) + 
   ggtitle("LSmean for Each Sample Type") + 
@@ -177,3 +181,50 @@ p1 <- ggplot(sd_out, aes(lsmean, logsd), colour = sample) +
   ggtitle("Logsd vs. abundance of protein spots") +
   geom_smooth()
 p1
+
+
+##
+
+deplete_nocy_ind <- laply(1:dim(dat_final)[1], function(i)(sum(is.na(deplete[i,][cy==3]))==8|sum(is.na(deplete[i,][cy==5]))==8) & 
+                            (sum(is.na(deplete[i,][line==1]))==8|sum(is.na(deplete[i,][line==2]))==8))
+#sum(deplete_nocy_ind)
+
+whole_nocy_ind <- laply(1:dim(dat_final)[1], function(i)(sum(is.na(whole[i,][cy==3]))==8|sum(is.na(whole[i,][cy==5]))==8) & 
+                          (sum(is.na(whole[i,][line==1]))==8|sum(is.na(whole[i,][line==2]))==8))
+
+
+str(deplete)
+group[group=="Whole"] 
+head(deplete)
+
+cy <-  rep(c(5,5,3,3),4)
+deplete_nocy_ind <- laply(1:dim(dat_final)[1], function(i)
+  (sum(is.na(deplete[i,][cy==3]))==8|sum(is.na(deplete[i,][cy==5]))==8))
+#sum(deplete_nocy_ind)
+which(deplete_nocy_ind)
+cy <-  rep(c(3,3,5,5),4)
+whole_nocy_ind <- laply(1:dim(dat_final)[1], function(i)
+  (sum(is.na(whole[i,][cy==3]))==8|sum(is.na(whole[i,][cy==5]))==8))
+#sum(whole_nocy_ind)
+which(whole_nocy_ind)
+whole[24,]
+deplete[24,]
+
+
+
+cy <-  rep(c(5,5,3,3),4)
+deplete_noline_ind <- laply(1:dim(dat_final)[1], function(i)
+  (sum(is.na(deplete[i,][cy==3]))!=8& sum(is.na(deplete[i,][cy==5]))!=8) & 
+    ((sum(is.na(deplete[i,][line==1]))!=8)&(sum(is.na(deplete[i,][line==2]))!=8)))
+#sum(deplete_noline_ind)
+which(deplete_noline_ind)
+cy <-  rep(c(3,3,5,5),4)
+whole_nocy_ind <- laply(1:dim(dat_final)[1], function(i)
+  (sum(is.na(whole[i,][line ==1]))==8|sum(is.na(whole[i,][line ==2]))==8))
+#sum(whole_nocy_ind)
+which(whole_nocy_ind)
+whole[24,]
+deplete[24,]
+
+##Low RFI = 1209, 4810, 1906, 1807
+##High RFI = 3106, 3908, 2107, 2712
