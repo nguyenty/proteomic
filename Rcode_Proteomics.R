@@ -235,5 +235,60 @@ deplete[24,]
 ## linear mixed effect model 
 model <- lmer(deplete[1,]~ cy + line + (1|animal), na.action="na.omit")
 
+str(summary(model))
+####Model in Rnw. file####
+out_model <- function(x, depleted){ # x is the row of data (i.e., data of each protein spot)
+  if (depleted == "TRUE"){
+    cy <- as.factor(rep(c(5,5,3,3),4))
+  } else {
+    cy <- as.factor(rep(c(3,3,5,5),4))
+  }
+  animal <- as.factor(rep(1:8, each = 2))
+  line <- as.factor(rep(c(1,2), each = 8))
+  # check if all obsetvations for one Cy are missing or not
+  
+  if ((sum(is.na(x[cy==3]))==8|sum(is.na(x[cy==5]))==8) & # if all cy is missing
+        (sum(is.na(x[line==1]))==8|sum(is.na(x[line==2]))==8)){# if all Line is missing
+    model <- lmer(x~ (1|animal), na.action="na.omit")
+    s_model <- summary(model)
+    mean_est <- s_model$coeff[,1]
+    sd_est <- as.vector(sqrt(s_model$vcov))
+    #str(s_model)
+  } 
+  if ((sum(is.na(x[cy==3]))==8|sum(is.na(x[cy==5]))==8) & # if cy is missing
+        ((sum(is.na(x[line==1]))!=8)&(sum(is.na(x[line==2]))!=8))){ # if line is not missing
+    model <- lmer(x~ line + (1|animal), na.action="na.omit")
+    s_model <- summary(model)
+    mean_est <- s_model$coeff[1,1] + s_model$coeff[2,1]/2
+    sd_est <- as.vector(sqrt(t(c(1,1/2)) %*%s_model$vcov%*%c(1,1/2)))
+  }
+  
+  if ((sum(is.na(x[cy==3]))!=8&sum(is.na(x[cy==5]))!=8) &  # if cy is not missing
+        ((sum(is.na(x[line==1]))==8)|(sum(is.na(x[line==2]))==8))){ # if line is missing
+    model <- lmer(x~ cy + (1|animal), na.action="na.omit")
+    s_model <- summary(model)
+    mean_est <- s_model$coeff[1,1] + s_model$coeff[2,1]/2
+    sd_est <- as.vector(sqrt(t(c(1,1/2)) %*%s_model$vcov%*%c(1,1/2)))
+  }
+  
+  if ((sum(is.na(x[cy==3]))!=8& sum(is.na(x[cy==5]))!=8) & 
+        ((sum(is.na(x[line==1]))!=8)&(sum(is.na(x[line==2]))!=8))){ 
+    model <- lmer(x~ cy + line + (1|animal), na.action="na.omit")
+    s_model <- summary(model)
+    #str(s_model)
+    mean_est <- s_model$coeff[1,1] + 
+      s_model$coeff[2,1]/2 + 
+      s_model$coeff[3,1]/2
+    
+    sd_est <- as.vector(sqrt(t(c(1, 1/2, 1/2))%*% s_model$vcov %*%c(1,1/2, 1/2)))  }
+  
+  
+  return(c(sd_est, mean_est))
+}
+sd_depleted <- laply(1:dim(dat_final)[1], function(i)out_model(deplete[i,], depleted = "TRUE")[1])
 
+sd_whole <- laply(1:dim(dat_final)[1], function(i)out_model(whole[i,], depleted = "FALSE")[1])
 
+lsmean_depleted <- laply(1:dim(dat_final)[1], function(i)out_model(deplete[i,], depleted = "TRUE")[2])
+
+lsmean_whole <- laply(1:dim(dat_final)[1], function(i)out_model(whole[i,], depleted = "FALSE")[2])

@@ -136,7 +136,7 @@ out_model <- function(x, depleted){ # x is the row of data (i.e., data of each p
     model <- lmer(x~ (1|animal), na.action="na.omit")
     s_model <- summary(model)
     mean_est <- s_model$coeff[,1]
-    sd_est <- as.vector(sqrt(s_model$vcov))
+    se_est <- as.vector(sqrt(s_model$vcov))
     #str(s_model)
   } 
   if ((sum(is.na(x[cy==3]))==8|sum(is.na(x[cy==5]))==8) & # if cy is missing
@@ -144,7 +144,7 @@ out_model <- function(x, depleted){ # x is the row of data (i.e., data of each p
     model <- lmer(x~ line + (1|animal), na.action="na.omit")
     s_model <- summary(model)
     mean_est <- s_model$coeff[1,1] + s_model$coeff[2,1]/2
-    sd_est <- as.vector(sqrt(t(c(1,1/2)) %*%s_model$vcov%*%c(1,1/2)))
+    se_est <- as.vector(sqrt(t(c(1,1/2)) %*%s_model$vcov%*%c(1,1/2)))
   }
   
   if ((sum(is.na(x[cy==3]))!=8&sum(is.na(x[cy==5]))!=8) &  # if cy is not missing
@@ -152,7 +152,7 @@ out_model <- function(x, depleted){ # x is the row of data (i.e., data of each p
     model <- lmer(x~ cy + (1|animal), na.action="na.omit")
     s_model <- summary(model)
     mean_est <- s_model$coeff[1,1] + s_model$coeff[2,1]/2
-    sd_est <- as.vector(sqrt(t(c(1,1/2)) %*%s_model$vcov%*%c(1,1/2)))
+    se_est <- as.vector(sqrt(t(c(1,1/2)) %*%s_model$vcov%*%c(1,1/2)))
   }
   
   if ((sum(is.na(x[cy==3]))!=8& sum(is.na(x[cy==5]))!=8) & 
@@ -164,14 +164,14 @@ out_model <- function(x, depleted){ # x is the row of data (i.e., data of each p
      s_model$coeff[2,1]/2 + 
      s_model$coeff[3,1]/2
     
-    sd_est <- as.vector(sqrt(t(c(1, 1/2, 1/2))%*% s_model$vcov %*%c(1,1/2, 1/2)))  }
+    se_est <- as.vector(sqrt(t(c(1, 1/2, 1/2))%*% s_model$vcov %*%c(1,1/2, 1/2)))  }
   
   
-  return(c(sd_est, mean_est))
+  return(c(se_est, mean_est))
 }
-sd_depleted <- laply(1:dim(dat_final)[1], function(i)out_model(deplete[i,], depleted = "TRUE")[1])
+se_depleted <- laply(1:dim(dat_final)[1], function(i)out_model(deplete[i,], depleted = "TRUE")[1])
 
-sd_whole <- laply(1:dim(dat_final)[1], function(i)out_model(whole[i,], depleted = "FALSE")[1])
+se_whole <- laply(1:dim(dat_final)[1], function(i)out_model(whole[i,], depleted = "FALSE")[1])
 
 lsmean_depleted <- laply(1:dim(dat_final)[1], function(i)out_model(deplete[i,], depleted = "TRUE")[2])
 
@@ -182,19 +182,19 @@ lsmean_whole <- laply(1:dim(dat_final)[1], function(i)out_model(whole[i,], deple
 \subsection{Proportion of protein spots whose standard error in the depleted samples larger than that one  in the whole samples}
 Proportion of protein spots whose standard error in the depleted samples larger than that one  in the whole samples.
 <<>>=
-mean(sd_depleted > sd_whole)
+mean(se_depleted > se_whole)
 @
 
 Figure \ref{fig:fg1} show the log of standard error of all protein spots in 2 sample types.
 
 <<fg1, tidy=FALSE,fig.cap= "Log(Standard Error) for Each Sample Type",fig.pos='H', fig.width =5, fig.height=5>>=
 
-log_sd <- data.frame(
-  logsd = log(c(sd_whole, sd_depleted)), 
-  sample = rep(c("whole", "depleted"), each = length(sd_whole)))
-# write.table(log_sd, file = "log_sd.txt")
+log_se <- data.frame(
+  logse = log(c(se_whole, se_depleted)), 
+  sample = rep(c("whole", "depleted"), each = length(se_whole)))
+# write.table(log_se, file = "log_se.txt")
 
-p <- ggplot(log_sd, aes(sample, logsd))
+p <- ggplot(log_se, aes(sample, logse))
 p + geom_boxplot(aes(fill = sample)) + 
   ggtitle("Standard Error for Each Sample Type") + 
   scale_fill_discrete(name= "Sample Type") + 
@@ -203,13 +203,27 @@ p + geom_boxplot(aes(fill = sample)) +
   theme(text = element_text(size=11))
 @
 
-Figure \ref{fig:fg6} is the scatter plot of logsd of Depleted Sample vs. Whole Sample.
+Figure \ref{fig:fg6} is the scatter plot of logse of Depleted Sample vs. Whole Sample.
 
 <<fg6, tidy=FALSE,fig.cap= "Scatter plot of Log(Standard Error)",fig.pos='H', fig.width =5, fig.height=5>>=
-reg <- lm(log(sd_depleted)~log(sd_whole))
+#reg <- lm(log(se_depleted)~log(se_whole))
 par(cex=.8)
-plot(log(sd_whole), log(sd_depleted), main ="Scatter plot of Log(Standard Error)" )
-abline(reg)
+plot(log(se_whole), log(se_depleted), main ="Scatter plot of Log(Standard Error)" ,
+     xlim = c(-3, 4), ylim = c(-3, 4))
+abline(a =0, b = 1)
+
+@
+
+Figure \ref{fig:fg7} is the scatter plot of difference of logse vs. the average of logse.
+
+<<fg7, tidy=FALSE,fig.cap= "Scatter plot of Log(Standard Error) II",fig.pos='H', fig.width =5, fig.height=5>>=
+diff_logse <- log(se_depleted) - log(se_whole)
+aver_logse <- (log(se_depleted) + log(se_whole))/2
+
+par(cex=.8)
+plot(aver_logse, diff_logse, main ="Scatter plot of diff_logse vs. aver_logse" ,
+     xlim = c(-3, 4), ylim = c(-3, 4))
+abline(h = 0)
 
 @
 \subsection{One-sided Wilcoxon test for log Standard Error}
@@ -217,17 +231,17 @@ Consider a Wilcoxon signed-rank test H0: The distribution of the  standard error
 
 <<echo = TRUE,message=FALSE,warning=FALSE>>=
 # One-sided Test for the log-transformed standard errors
-wilcox.test(log(sd_depleted/sd_whole), alternative = "greater")
+wilcox.test(log(se_depleted/se_whole), alternative = "greater")
 
 @
 
-% \subsection{Boxplot for logsd(deplete$/$whole)}
+% \subsection{Boxplot for logse(deplete$/$whole)}
 % Figure \ref{fig:fg2} show the log ratio of the standard errors of two sample types.
 % 
 % <<fg2, tidy=FALSE,fig.cap= "Log Ratio of Standard Error for Each Sample Type",fig.pos='h'>>=
 % 
-% logratiosd <- log(sd_depleted/sd_whole)
-% boxplot(logratiosd, main = "Log(sd_depleted/sd_whole)")
+% logratiose <- log(se_depleted/se_whole)
+% boxplot(logratiose, main = "Log(se_depleted/se_whole)")
 % abline(h = 0)
 % @
 % 
@@ -249,7 +263,7 @@ Figure \ref{fig:fg3} shows the  lsmean of all protein spots in 2 sample types.
 ls_mean <- data.frame(
   lsmean = (c(lsmean_whole, lsmean_depleted)), 
   sample = rep(c("whole", "depleted"), each = length(lsmean_whole)))
-# write.table(log_sd, file = "log_sd.txt")
+# write.table(log_se, file = "log_se.txt")
 
 p <- ggplot(ls_mean, aes(sample, lsmean))
 p + geom_boxplot(aes(fill = sample)) + 
@@ -266,7 +280,7 @@ Figure \ref{fig:fg4} shows the  lsmean of all protein spots in 2 sample types, e
 ls_mean <- data.frame(
   lsmean = (c(lsmean_whole[lsmean_depleted >-10], lsmean_depleted[lsmean_depleted >-10])), 
   sample = rep(c("whole", "depleted"), each = length(lsmean_whole[lsmean_depleted >-10])))
-# write.table(log_sd, file = "log_sd.txt")
+# write.table(log_se, file = "log_se.txt")
 
 p <- ggplot(ls_mean, aes(sample, lsmean))
 p + geom_boxplot(aes(fill = sample)) + 
@@ -295,21 +309,21 @@ wilcox.test(lsmean_depleted,
 @
 
 
-\section{Plot logsd of LSmean vs LSmean for the data excluding LSmean less than -10}
+\section{Plot logse of LSmean vs LSmean for the data excluding LSmean less than -10}
 
-<<fig.pos = "H", warning=FALSE,message=FALSE>>=
+<<fig.pos = "H", warning=FALSE,message=FALSE, tidy=FALSE>>=
 
 res_out <- data.frame(
-  logsd = log(c(sd_whole, sd_depleted)),
+  logse = log(c(se_whole, se_depleted)),
   lsmean = c(lsmean_whole,lsmean_depleted),
-  sample = rep(c("whole", "depleted"), each = length(sd_whole)))
+  sample = rep(c("whole", "depleted"), each = length(se_whole)))
 
 
-p1 <- ggplot(res_out, aes(lsmean, logsd), colour = sample) + 
+p1 <- ggplot(res_out, aes(lsmean, logse), colour = sample) + 
   geom_point(aes(colour = sample)) + 
   xlim(-10, 10)+ 
   theme(text = element_text(size=18))+ 
-  ggtitle("Logsd vs. abundance of protein spots") +
+  ggtitle("Logse vs. abundance of protein spots") +
   geom_smooth()
 p1
 @
