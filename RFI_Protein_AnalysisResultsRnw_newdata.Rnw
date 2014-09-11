@@ -202,7 +202,17 @@ p + geom_boxplot(aes(fill = sample)) +
   ylab("log(Standard Error)") + 
   theme(text = element_text(size=11))
 @
-\subsection{One-sided Wilcoxon test}
+
+Figure \ref{fig:fg6} is the scatter plot of logsd of Depleted Sample vs. Whole Sample.
+
+<<fg6, tidy=FALSE,fig.cap= "Scatter plot of Log(Standard Error)",fig.pos='H', fig.width =5, fig.height=5>>=
+reg <- lm(log(sd_depleted)~log(sd_whole))
+par(cex=.8)
+plot(log(sd_whole), log(sd_depleted), main ="Scatter plot of Log(Standard Error)" )
+abline(reg)
+
+@
+\subsection{One-sided Wilcoxon test for log Standard Error}
 Consider a Wilcoxon signed-rank test H0: The distribution of the  standard errors across protein   is the same for  depleted samples and whole samples, H1: the standard errors tend to be larger for depleted samples than for whole samples.  The test using log-transformed standard errors has p-value = 0.004275. 
 
 <<echo = TRUE,message=FALSE,warning=FALSE>>=
@@ -270,17 +280,17 @@ p + geom_boxplot(aes(fill = sample)) +
 
 
 \subsection{One-sided Wilcoxon test for the lsmean}
-Consider a Wilcoxon signed-rank test H0: The distribution of the  standardized abundance level across protein   is the same for  depleted samples and whole samples, H1: the standardized abundance level tend to be larger for depleted samples than for whole samples. P-value is 0.1964 for the subset of data excluding those with estimated abundance less than -10 as in Figure \ref{fig:fg4}, and is 0.476 for all data.
+Consider a Wilcoxon signed-rank test H0: The distribution of the  standardized abundance level across protein   is the same for  depleted samples and whole samples, H1: the standardized abundance level tend to be larger for depleted samples than for whole samples. P-value is 0.169 for the subset of data excluding those with estimated abundance less than -10 as in Figure \ref{fig:fg4}, and is 0.3977 for all data.
 
 <<echo = TRUE,message=FALSE,warning=FALSE,tidy=FALSE>>=
 # One-sided Test for the log-transformed standard errors
 wilcox.test(lsmean_depleted[lsmean_depleted >-10], 
             lsmean_whole[lsmean_depleted >-10], 
-            alternative ="greater")
+            alternative ="greater", paired = TRUE)
 
 wilcox.test(lsmean_depleted, 
             lsmean_whole, 
-            alternative ="greater")
+            alternative ="greater", paired = TRUE)
 
 @
 

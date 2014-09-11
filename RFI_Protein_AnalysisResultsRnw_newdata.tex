@@ -80,9 +80,11 @@
 
 
 
+
 \title{Analyze Protein Data}%replace X with the appropriate number
 \author{} 
 \maketitle
+
 
 
 
@@ -146,6 +148,7 @@
 \end{knitrout}
 
 
+
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -186,6 +189,7 @@
 \end{kframe}
 \end{knitrout}
 
+
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -200,8 +204,13 @@
 \begin{verbatim}
 ## [1] 239  33
 \end{verbatim}
+\begin{alltt}
+
+
+\end{alltt}
 \end{kframe}
 \end{knitrout}
+
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -264,12 +273,13 @@
 \end{kframe}
 \end{knitrout}
 
+
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlcom{# Find out which Cy is used for each run}
 
-\hlstd{group[group}\hlopt{==}\hlstr{"Depleted"}\hlstd{]} \hlcom{# Cy for depleted sample : rep(c(5,5,3,3),4)}
+\hlstd{group[group} \hlopt{==} \hlstr{"Depleted"}\hlstd{]}  \hlcom{# Cy for depleted sample : rep(c(5,5,3,3),4)}
 \end{alltt}
 \begin{verbatim}
 ## Gel_1_Run_1_Pig_1807_45034.CY5.gel Gel_1_Run_2_Pig_1807_45046.CY5.gel 
@@ -290,7 +300,7 @@
 ##                         "Depleted"                         "Depleted"
 \end{verbatim}
 \begin{alltt}
-\hlstd{group[group}\hlopt{==}\hlstr{"Whole"}\hlstd{]} \hlcom{# Cy for whole sample : rep(c(3,3,5,5),4)}
+\hlstd{group[group} \hlopt{==} \hlstr{"Whole"}\hlstd{]}  \hlcom{# Cy for whole sample : rep(c(3,3,5,5),4)}
 \end{alltt}
 \begin{verbatim}
 ## Gel_1_Run_1_Pig_1807_45034.CY3.gel Gel_1_Run_2_Pig_1807_45046.CY3.gel 
@@ -312,6 +322,7 @@
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
+
 \section{Function to fit a Linear Mixed Effect Model for each spot in each sample }
 Function to fit a linear mixed model for each spot, with fixed effects are Cy, RFI Line and the random effect is animal.
 
@@ -377,6 +388,7 @@ Function to fit a linear mixed model for each spot, with fixed effects are Cy, R
 \end{kframe}
 \end{knitrout}
 
+
 \section{Results of Comparison of Standard Errors between Two Sample Types}
 \subsection{Proportion of protein spots whose standard error in the depleted samples larger than that one  in the whole samples}
 Proportion of protein spots whose standard error in the depleted samples larger than that one  in the whole samples.
@@ -390,6 +402,7 @@ Proportion of protein spots whose standard error in the depleted samples larger 
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
+
 
 Figure \ref{fig:fg1} show the log of standard error of all protein spots in 2 sample types.
 
@@ -416,7 +429,27 @@ Figure \ref{fig:fg1} show the log of standard error of all protein spots in 2 sa
 
 
 \end{knitrout}
-\subsection{One-sided Wilcoxon test}
+
+
+Figure \ref{fig:fg6} is the scatter plot of logsd of Depleted Sample vs. Whole Sample.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{reg} \hlkwb{<-} \hlkwd{lm}\hlstd{(}\hlkwd{log}\hlstd{(sd_depleted)}\hlopt{~}\hlkwd{log}\hlstd{(sd_whole))}
+\hlkwd{par}\hlstd{(}\hlkwc{cex}\hlstd{=}\hlnum{.8}\hlstd{)}
+\hlkwd{plot}\hlstd{(}\hlkwd{log}\hlstd{(sd_whole),} \hlkwd{log}\hlstd{(sd_depleted),} \hlkwc{main} \hlstd{=}\hlstr{"Scatter plot of Log(Standard Error)"} \hlstd{)}
+\hlkwd{abline}\hlstd{(reg)}
+\end{alltt}
+\end{kframe}\begin{figure}[H]
+
+\includegraphics[width=\maxwidth]{figure/fg6} \caption[Scatter plot of Log(Standard Error)]{Scatter plot of Log(Standard Error)\label{fig:fg6}}
+\end{figure}
+
+
+\end{knitrout}
+
+\subsection{One-sided Wilcoxon test for log Standard Error}
 Consider a Wilcoxon signed-rank test H0: The distribution of the  standard errors across protein   is the same for  depleted samples and whole samples, H1: the standard errors tend to be larger for depleted samples than for whole samples.  The test using log-transformed standard errors has p-value = 0.004275. 
 
 \begin{knitrout}
@@ -435,6 +468,7 @@ Consider a Wilcoxon signed-rank test H0: The distribution of the  standard error
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
+
 
 % \subsection{Boxplot for logsd(deplete$/$whole)}
 % Figure \ref{fig:fg2} show the log ratio of the standard errors of two sample types.
@@ -464,6 +498,7 @@ Proportion of protein spots whose lsmean in the depleted samples larger than tha
 \end{knitrout}
 
 
+
 Figure \ref{fig:fg3} shows the  lsmean of all protein spots in 2 sample types.  
 
 \begin{knitrout}
@@ -489,6 +524,7 @@ Figure \ref{fig:fg3} shows the  lsmean of all protein spots in 2 sample types.
 
 
 \end{knitrout}
+
 
 Figure \ref{fig:fg4} shows the  lsmean of all protein spots in 2 sample types, excluding the spots whose lsmean of depleted sample less than or equal -10.
 \begin{knitrout}
@@ -517,8 +553,9 @@ Figure \ref{fig:fg4} shows the  lsmean of all protein spots in 2 sample types, e
 
 
 
+
 \subsection{One-sided Wilcoxon test for the lsmean}
-Consider a Wilcoxon signed-rank test H0: The distribution of the  standardized abundance level across protein   is the same for  depleted samples and whole samples, H1: the standardized abundance level tend to be larger for depleted samples than for whole samples. P-value is 0.1964 for the subset of data excluding those with estimated abundance less than -10 as in Figure \ref{fig:fg4}, and is 0.476 for all data.
+Consider a Wilcoxon signed-rank test H0: The distribution of the  standardized abundance level across protein   is the same for  depleted samples and whole samples, H1: the standardized abundance level tend to be larger for depleted samples than for whole samples. P-value is 0.169 for the subset of data excluding those with estimated abundance less than -10 as in Figure \ref{fig:fg4}, and is 0.3977 for all data.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -526,31 +563,32 @@ Consider a Wilcoxon signed-rank test H0: The distribution of the  standardized a
 \hlcom{# One-sided Test for the log-transformed standard errors}
 \hlkwd{wilcox.test}\hlstd{(lsmean_depleted[lsmean_depleted} \hlopt{>-}\hlnum{10}\hlstd{],}
             \hlstd{lsmean_whole[lsmean_depleted} \hlopt{>-}\hlnum{10}\hlstd{],}
-            \hlkwc{alternative} \hlstd{=}\hlstr{"greater"}\hlstd{)}
+            \hlkwc{alternative} \hlstd{=}\hlstr{"greater"}\hlstd{,} \hlkwc{paired} \hlstd{=} \hlnum{TRUE}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
 ## 
-## 	Wilcoxon rank sum test with continuity correction
+## 	Wilcoxon signed rank test with continuity correction
 ## 
 ## data:  lsmean_depleted[lsmean_depleted > -10] and lsmean_whole[lsmean_depleted > -10]
-## W = 28387, p-value = 0.1964
+## V = 14618, p-value = 0.169
 ## alternative hypothesis: true location shift is greater than 0
 \end{verbatim}
 \begin{alltt}
 \hlkwd{wilcox.test}\hlstd{(lsmean_depleted,}
             \hlstd{lsmean_whole,}
-            \hlkwc{alternative} \hlstd{=}\hlstr{"greater"}\hlstd{)}
+            \hlkwc{alternative} \hlstd{=}\hlstr{"greater"}\hlstd{,} \hlkwc{paired} \hlstd{=} \hlnum{TRUE}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
 ## 
-## 	Wilcoxon rank sum test with continuity correction
+## 	Wilcoxon signed rank test with continuity correction
 ## 
 ## data:  lsmean_depleted and lsmean_whole
-## W = 28652, p-value = 0.476
+## V = 14618, p-value = 0.3977
 ## alternative hypothesis: true location shift is greater than 0
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
+
 
 
 \section{Plot logsd of LSmean vs LSmean for the data excluding LSmean less than -10}
@@ -558,23 +596,18 @@ Consider a Wilcoxon signed-rank test H0: The distribution of the  standardized a
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{res_out} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}
-  \hlkwc{logsd} \hlstd{=} \hlkwd{log}\hlstd{(}\hlkwd{c}\hlstd{(sd_whole, sd_depleted)),}
-  \hlkwc{lsmean} \hlstd{=} \hlkwd{c}\hlstd{(lsmean_whole,lsmean_depleted),}
-  \hlkwc{sample} \hlstd{=} \hlkwd{rep}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"whole"}\hlstd{,} \hlstr{"depleted"}\hlstd{),} \hlkwc{each} \hlstd{=} \hlkwd{length}\hlstd{(sd_whole)))}
+\hlstd{res_out} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwc{logsd} \hlstd{=} \hlkwd{log}\hlstd{(}\hlkwd{c}\hlstd{(sd_whole, sd_depleted)),} \hlkwc{lsmean} \hlstd{=} \hlkwd{c}\hlstd{(lsmean_whole, lsmean_depleted),}
+    \hlkwc{sample} \hlstd{=} \hlkwd{rep}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"whole"}\hlstd{,} \hlstr{"depleted"}\hlstd{),} \hlkwc{each} \hlstd{=} \hlkwd{length}\hlstd{(sd_whole)))}
 
 
-\hlstd{p1} \hlkwb{<-} \hlkwd{ggplot}\hlstd{(res_out,} \hlkwd{aes}\hlstd{(lsmean, logsd),} \hlkwc{colour} \hlstd{= sample)} \hlopt{+}
-  \hlkwd{geom_point}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{colour} \hlstd{= sample))} \hlopt{+}
-  \hlkwd{xlim}\hlstd{(}\hlopt{-}\hlnum{10}\hlstd{,} \hlnum{10}\hlstd{)}\hlopt{+}
-  \hlkwd{theme}\hlstd{(}\hlkwc{text} \hlstd{=} \hlkwd{element_text}\hlstd{(}\hlkwc{size}\hlstd{=}\hlnum{18}\hlstd{))}\hlopt{+}
-  \hlkwd{ggtitle}\hlstd{(}\hlstr{"Logsd vs. abundance of protein spots"}\hlstd{)} \hlopt{+}
-  \hlkwd{geom_smooth}\hlstd{()}
+\hlstd{p1} \hlkwb{<-} \hlkwd{ggplot}\hlstd{(res_out,} \hlkwd{aes}\hlstd{(lsmean, logsd),} \hlkwc{colour} \hlstd{= sample)} \hlopt{+} \hlkwd{geom_point}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{colour} \hlstd{= sample))} \hlopt{+} \hlkwd{xlim}\hlstd{(}\hlopt{-}\hlnum{10}\hlstd{,}
+    \hlnum{10}\hlstd{)} \hlopt{+} \hlkwd{theme}\hlstd{(}\hlkwc{text} \hlstd{=} \hlkwd{element_text}\hlstd{(}\hlkwc{size} \hlstd{=} \hlnum{18}\hlstd{))} \hlopt{+} \hlkwd{ggtitle}\hlstd{(}\hlstr{"Logsd vs. abundance of protein spots"}\hlstd{)} \hlopt{+} \hlkwd{geom_smooth}\hlstd{()}
 \hlstd{p1}
 \end{alltt}
 \end{kframe}
 \includegraphics[width=\maxwidth]{figure/unnamed-chunk-12} 
 
 \end{knitrout}
+
 
 \end{document}

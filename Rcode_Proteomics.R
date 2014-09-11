@@ -161,8 +161,11 @@ p + geom_boxplot(aes(fill = sample)) +
 
 summary(depleted_out[,1])
 summary(whole_out[,1])
-wilcox.test((depleted_out[which(depleted_out[,1] >=-10),1]), (whole_out[which(depleted_out[,1] >=-10), 1]), alternative = "greater", paired = TRUE)
+wilcox.test((depleted_out[which(depleted_out[,1] >=-10),1]), (whole_out[which(depleted_out[,1] >=-10), 1]), 
+            alternative = "greater", paired = TRUE)
 
+wilcox.test((depleted_out[which(depleted_out[,1] >=-10),1])- (whole_out[which(depleted_out[,1] >=-10), 1]), 
+            alternative = "greater")
 #wilcox.test(depleted_out[,2], whole_out[, 2], alternative = "two.sided", paired = TRUE)
 
 
