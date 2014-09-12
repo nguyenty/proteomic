@@ -321,3 +321,14 @@ par(cex=.8)
 plot(average_logse, difference_logse,
      xlim = c(-3, 4), ylim = c(-3, 4))
 abline(h = 0)
+
+
+par(cex=.8)
+plot(log(se_whole), log(se_depleted), 
+     main ="Scatter plot of Log(Standard Error)" ,
+     xlab = "Log(Standard Error) for Whole Data",
+     ylab = "Log(Standard Error) for Depleted Data",
+     xlim = c(-4, 4), ylim = c(-4, 4))
+abline(a =0, b = 1)
+abline(h = mean(log(se_depleted)), lty = 2)
+abline(v = mean(log(se_whole)), lty = 2)
